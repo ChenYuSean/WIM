@@ -39,8 +39,11 @@ public class ConeScript : MonoBehaviour
 
         MainCollider.transform.localScale = new Vector3(1, 1, 1);
         AuxCollider.transform.localScale = new Vector3(1, 1, 1);
+    }
 
-        if(GameManager.Instance.getMode() == CASTING_MODE.DroneLayer)
+    void Start()
+    {
+        if (GameManager.Instance.getMode() == CASTING_MODE.DroneLayer)
             AuxCollider.SetActive(true);
         else
             AuxCollider.SetActive(false);
@@ -227,15 +230,15 @@ public class ConeScript : MonoBehaviour
 
         // Debug
    
-        string s = "Angle: ";
-        s += ScanningAngle;
-        s += " / Layer Depth:[";
-        foreach(var d in LayerDepth)
-        {
-            s += d;
-            s += ",";
-        }
-        s += "]"; 
-        Debug.Log(s);
+        //string s = "Angle: ";
+        //s += ScanningAngle;
+        //s += " / Layer Depth:[";
+        //foreach(var d in LayerDepth)
+        //{
+        //    s += d;
+        //    s += ",";
+        //}
+        //s += "]"; 
+        //Debug.Log(s);
     }
 }

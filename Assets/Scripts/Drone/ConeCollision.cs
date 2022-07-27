@@ -79,6 +79,13 @@ public class ConeCollision : MonoBehaviour
     }
     public Collider[] getScannedColliders(LayerMask layermask)
     {
+        int turnOffNearField = 1 << LayerMask.NameToLayer("NearFieldObjects");
+        int turnOffUnchangeable = 1 << LayerMask.NameToLayer("UnchangeableObjects");
+        turnOffNearField = ~turnOffNearField; // NearField Layer = 0, other layer = 1 
+        turnOffUnchangeable = ~turnOffUnchangeable;
+        layermask &= turnOffNearField; // turn off NearField
+        layermask &= turnOffUnchangeable;
+
         List<Collider> FilteredColliders = new List<Collider>();
         foreach(var c in colliders)
         {

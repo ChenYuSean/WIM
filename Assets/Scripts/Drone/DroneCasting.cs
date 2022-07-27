@@ -123,14 +123,14 @@ public class DroneCasting : MonoBehaviour
 
     void Awake()
     {
-        NearFieldSphere = GameObject.Find("NearFieldSphere");
-        BubbleDiskR = GameObject.Find("Bubble");
-        BubbleDiskL = GameObject.Find("BubbleL");
-        RayEndR = GameObject.Find("RayEndPoint");
-        RayEndL = GameObject.Find("RayEndPointL");
-        Drone = GameObject.Find("Drone");
-        ReplicaParent = GameObject.Find("ReplicaParent");
-        Cone = GameObject.Find("ScanningCone");
+        NearFieldSphere = transform.Find("NearFieldSphere").gameObject;
+        BubbleDiskR = transform.Find("Bubble").gameObject;
+        BubbleDiskL = transform.Find("BubbleL").gameObject;
+        RayEndR = transform.Find("RayEndPoint").gameObject;
+        RayEndL = transform.Find("RayEndPointL").gameObject;
+        Drone = transform.Find("Drone").gameObject;
+        ReplicaParent = transform.Find("ReplicaParent").gameObject;
+        Cone = transform.Find("ScanningCone").gameObject;
         ScanningAngle = DefaultAngle;
         ScanningDepth = DefaultDepth;
     }
@@ -212,7 +212,7 @@ public class DroneCasting : MonoBehaviour
 
         if (NOWSTEP == STEP.dflt)
         {
-            RayLengthR = 100.0f;
+            RayLengthR = 1000.0f;
             RayLengthL = 0.0f;
             if (Physics.Raycast(RayOriginR, RayDirectionR, out rhit, RayLengthR, layerMask))
             {
@@ -932,11 +932,6 @@ public class DroneCasting : MonoBehaviour
         float distance = 0;
         while (i < coveredTargets.Length)
         {
-            //if (coveredTargets[i].name == "MainSphere" || coveredTargets[i].tag == "NoCopy" || coveredTargets[i].tag == "Floor")
-            //{
-            //    i++;
-            //    continue;
-            //}
             sum += coveredTargets[i].transform.position - center;
             i++;
         }
@@ -944,21 +939,17 @@ public class DroneCasting : MonoBehaviour
         i = 0;
         while (i < coveredTargets.Length)
         {
-            //if (coveredTargets[i].name == "MainSphere" || coveredTargets[i].tag == "NoCopy" || coveredTargets[i].tag == "Floor")
-            //{
-            //    i++;
-            //    continue;
-            //}
             // realdis represents the offset relative to the center of the casting sphere
             realdis[i] = coveredTargets[i].transform.position - objCenter;
-            Ray ray = new Ray(objCenter + 100 * (coveredTargets[i].bounds.center - objCenter), objCenter - coveredTargets[i].bounds.center);
+            Vector3 rayVector = coveredTargets[i].bounds.center - objCenter;
+            Ray ray = new Ray(objCenter + 30 * rayVector, objCenter - coveredTargets[i].bounds.center);
             RaycastHit hit;
             if (objCenter == coveredTargets[i].bounds.center)
             {
                 distance = Vector3.Distance(Vector3.zero, coveredTargets[i].bounds.size) / 2;
             }
             else
-            if (coveredTargets[i].Raycast(ray, out hit, 2000.0f))
+            if (coveredTargets[i].Raycast(ray, out hit, 40*(rayVector.magnitude)))
             {
                 distance = Vector3.Distance(hit.point, objCenter);
             }
@@ -1190,14 +1181,20 @@ public class DroneCasting : MonoBehaviour
         int layerMask = 1 << LayerMask.NameToLayer("NearFieldObjects");
         // This would cast rays only against colliders in layer 8.
         // But instead we want to collide against everything except layer 8. The ~ operator does this, it inverts a bitmask.
+        
+        /*
+         * Default: select everything except Nearfield and Unchange
+         * Step 1: select everything except Unchange
+         * Step 2: select Nearfield only
+         */
         if (step != STEP.Two)
         {
-            layerMask = ~layerMask;
-            layerMask ^= 1 << LayerMask.NameToLayer("UnchangeableObjects");
+            layerMask = ~layerMask; // select everything except layer NearField
+            layerMask ^= 1 << LayerMask.NameToLayer("UnchangeableObjects"); // turn off layer Unchangeable
         }
         if (step == STEP.One)
         {
-            layerMask ^= 1 << LayerMask.NameToLayer("NearFieldObjects");
+            layerMask ^= 1 << LayerMask.NameToLayer("NearFieldObjects"); //  turn on layer NearField
         }
         return layerMask;
     }

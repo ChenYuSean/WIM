@@ -11,7 +11,7 @@ public class GameManager : MonoBehaviour
     private HybridSelectionState mHybridSelectionState;
 
     [SerializeField]
-    private CASTING_MODE Mode = CASTING_MODE.SphereCasting;
+    private CASTING_MODE Mode = CASTING_MODE.DroneDepth;
 
     private void Awake()
     {
@@ -20,19 +20,6 @@ public class GameManager : MonoBehaviour
         else if (Instance != this)
             Destroy(gameObject);
         DontDestroyOnLoad(this.gameObject);
-        if(Mode == CASTING_MODE.SphereCasting)
-        {
-            GameObject.Find("[CameraRig]").GetComponent<SphereCasting>().enabled = true;
-            GameObject.Find("[CameraRig]").GetComponent<DroneCasting>().enabled = false ;
-        }
-        else if(Mode == CASTING_MODE.DroneLayer || Mode == CASTING_MODE.DroneDepth)
-        {
-            GameObject.Find("[CameraRig]").GetComponent<SphereCasting>().enabled = false;
-            GameObject.Find("[CameraRig]").GetComponent<DroneCasting>().enabled = true;
-        }
-    }
-    void Start()
-    {
         mHybridSelectionState = new HybridSelectionState();
     }
 
@@ -54,7 +41,6 @@ public class GameManager : MonoBehaviour
 
 public enum CASTING_MODE
 {
-    SphereCasting,
     DroneLayer,
     DroneDepth
 }
