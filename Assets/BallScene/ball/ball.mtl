@@ -1,0 +1,814 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# 创建的文件:28.03.2020 13:56:34
+
+newmtl Box001
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.72 0.61 0.90
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Box001VRayDiffuseFilterMap.tga
+	map_Kd maps\Box001VRayDiffuseFilterMap.tga
+
+newmtl Sphere001
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere001VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere001VRayDiffuseFilterMap.tga
+
+newmtl Sphere002
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere002VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere002VRayDiffuseFilterMap.tga
+
+newmtl Sphere003
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere003VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere003VRayDiffuseFilterMap.tga
+
+newmtl Sphere004
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere004VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere004VRayDiffuseFilterMap.tga
+
+newmtl Sphere005
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere005VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere005VRayDiffuseFilterMap.tga
+
+newmtl Sphere006
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere006VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere006VRayDiffuseFilterMap.tga
+
+newmtl Sphere007
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere007VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere007VRayDiffuseFilterMap.tga
+
+newmtl Sphere008
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere008VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere008VRayDiffuseFilterMap.tga
+
+newmtl Sphere009
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere009VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere009VRayDiffuseFilterMap.tga
+
+newmtl Sphere010
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere010VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere010VRayDiffuseFilterMap.tga
+
+newmtl Sphere011
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere011VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere011VRayDiffuseFilterMap.tga
+
+newmtl Sphere012
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere012VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere012VRayDiffuseFilterMap.tga
+
+newmtl Sphere013
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere013VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere013VRayDiffuseFilterMap.tga
+
+newmtl Sphere014
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere014VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere014VRayDiffuseFilterMap.tga
+
+newmtl Sphere015
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere015VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere015VRayDiffuseFilterMap.tga
+
+newmtl Sphere016
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere016VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere016VRayDiffuseFilterMap.tga
+
+newmtl Sphere017
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere017VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere017VRayDiffuseFilterMap.tga
+
+newmtl Sphere018
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere018VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere018VRayDiffuseFilterMap.tga
+
+newmtl Sphere019
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere019VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere019VRayDiffuseFilterMap.tga
+
+newmtl Sphere020
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere020VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere020VRayDiffuseFilterMap.tga
+
+newmtl Sphere021
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere021VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere021VRayDiffuseFilterMap.tga
+
+newmtl Sphere022
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere022VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere022VRayDiffuseFilterMap.tga
+
+newmtl Sphere023
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere023VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere023VRayDiffuseFilterMap.tga
+
+newmtl Sphere024
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere024VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere024VRayDiffuseFilterMap.tga
+
+newmtl Sphere025
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere025VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere025VRayDiffuseFilterMap.tga
+
+newmtl Sphere026
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere026VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere026VRayDiffuseFilterMap.tga
+
+newmtl Sphere027
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere027VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere027VRayDiffuseFilterMap.tga
+
+newmtl Sphere028
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere028VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere028VRayDiffuseFilterMap.tga
+
+newmtl Sphere029
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere029VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere029VRayDiffuseFilterMap.tga
+
+newmtl Sphere030
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere030VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere030VRayDiffuseFilterMap.tga
+
+newmtl Sphere031
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere031VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere031VRayDiffuseFilterMap.tga
+
+newmtl Sphere032
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere032VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere032VRayDiffuseFilterMap.tga
+
+newmtl Sphere033
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere033VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere033VRayDiffuseFilterMap.tga
+
+newmtl Sphere034
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere034VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere034VRayDiffuseFilterMap.tga
+
+newmtl Sphere035
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere035VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere035VRayDiffuseFilterMap.tga
+
+newmtl Sphere036
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere036VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere036VRayDiffuseFilterMap.tga
+
+newmtl Sphere037
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere037VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere037VRayDiffuseFilterMap.tga
+
+newmtl Sphere038
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere038VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere038VRayDiffuseFilterMap.tga
+
+newmtl Sphere039
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere039VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere039VRayDiffuseFilterMap.tga
+
+newmtl Sphere040
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere040VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere040VRayDiffuseFilterMap.tga
+
+newmtl Sphere041
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere041VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere041VRayDiffuseFilterMap.tga
+
+newmtl Sphere042
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere042VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere042VRayDiffuseFilterMap.tga
+
+newmtl Sphere043
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere043VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere043VRayDiffuseFilterMap.tga
+
+newmtl Sphere044
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere044VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere044VRayDiffuseFilterMap.tga
+
+newmtl Sphere045
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere045VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere045VRayDiffuseFilterMap.tga
+
+newmtl Sphere046
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere046VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere046VRayDiffuseFilterMap.tga
+
+newmtl Sphere047
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere047VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere047VRayDiffuseFilterMap.tga
+
+newmtl Sphere048
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere048VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere048VRayDiffuseFilterMap.tga
+
+newmtl Sphere049
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere049VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere049VRayDiffuseFilterMap.tga
+
+newmtl Sphere050
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere050VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere050VRayDiffuseFilterMap.tga
+
+newmtl Sphere051
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere051VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere051VRayDiffuseFilterMap.tga
+
+newmtl Sphere052
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere052VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere052VRayDiffuseFilterMap.tga
+
+newmtl Sphere053
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere053VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere053VRayDiffuseFilterMap.tga
+
+newmtl Sphere054
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere054VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere054VRayDiffuseFilterMap.tga
+
+newmtl Sphere055
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere055VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere055VRayDiffuseFilterMap.tga
+
+newmtl Sphere056
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.24 0.53 0.02
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\Sphere056VRayDiffuseFilterMap.tga
+	map_Kd maps\Sphere056VRayDiffuseFilterMap.tga
+
+newmtl floor
+	Ns 10.00
+	Ni 1.50
+	d 1.00
+	Tr 0.00
+	Tf 1.00 1.00 1.00 
+	illum 2
+	Ka 0.59 0.59 0.59
+	Kd 0.72 0.61 0.90
+	Ks 0.00 0.00 0.00
+	Ke 0.00 0.00 0.00
+	map_Ka maps\floorVRayDiffuseFilterMap.tga
+	map_Kd maps\floorVRayDiffuseFilterMap.tga
