@@ -37,6 +37,9 @@ public class ConeScript : MonoBehaviour
         AuxCollisionScript = AuxCollider.transform.Find("ColliderCone").GetComponent<ConeCollision>();
         PlaneCollisionScript = AuxCollider.transform.Find("BottomPlane").GetComponent<ConeCollision>();
 
+        MainCollider.transform.Find("ColliderCone").transform.localPosition = new Vector3(1, -1, 0);
+        AuxCollider.transform.Find("ColliderCone").transform.localPosition = new Vector3(1, -1, 0);
+
         MainCollider.transform.localScale = new Vector3(1, 1, 1);
         AuxCollider.transform.localScale = new Vector3(1, 1, 1);
     }

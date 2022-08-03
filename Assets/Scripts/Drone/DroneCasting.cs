@@ -123,14 +123,17 @@ public class DroneCasting : MonoBehaviour
 
     void Awake()
     {
-        NearFieldSphere = transform.Find("NearFieldSphere").gameObject;
-        BubbleDiskR = transform.Find("Bubble").gameObject;
-        BubbleDiskL = transform.Find("BubbleL").gameObject;
-        RayEndR = transform.Find("RayEndPoint").gameObject;
-        RayEndL = transform.Find("RayEndPointL").gameObject;
-        Drone = transform.Find("Drone").gameObject;
+        Transform CastingParent = transform.Find("Casting");
+        NearFieldSphere = CastingParent.Find("NearFieldSphere").gameObject;
+        BubbleDiskR = CastingParent.Find("Bubble").gameObject;
+        BubbleDiskL = CastingParent.Find("BubbleL").gameObject;
+        RayEndR = CastingParent.Find("RayEndPoint").gameObject;
+        RayEndL = CastingParent.Find("RayEndPointL").gameObject;
+        Drone = CastingParent.Find("Drone").gameObject;
+        Cone = CastingParent.Find("ScanningCone").gameObject;
+
         ReplicaParent = transform.Find("ReplicaParent").gameObject;
-        Cone = transform.Find("ScanningCone").gameObject;
+
         ScanningAngle = DefaultAngle;
         ScanningDepth = DefaultDepth;
     }
@@ -234,6 +237,7 @@ public class DroneCasting : MonoBehaviour
                 {
                     var offset = rhit.collider.bounds.size.y + 1;
                     Drone.transform.position = RayDestinationR + new Vector3(0,offset,0);
+                    ScanningDepth = 2*rhit.collider.bounds.size.y > DefaultDepth ? 2 * rhit.collider.bounds.size.y : DefaultDepth;
                     Cone.GetComponent<ConeScript>().setAngle(ScanningAngle);
                     Cone.transform.position = Drone.transform.position;
                     Cone.transform.rotation = Drone.transform.rotation;
@@ -551,7 +555,7 @@ public class DroneCasting : MonoBehaviour
     {
         const int counter_reset = 50;
         bool isXAxisHold =  (vec2TouchpadAxisL.x < -0.5 && isTouchpadLeftHoldL) || (vec2TouchpadAxisL.x > 0.5 && isTouchpadRightHoldL) ? true : false ;  
-        bool isYAxisHold =  (vec2TouchpadAxisL.y < -0.5 && isTouchpadDownHoldL) || (vec2TouchpadAxisL.y > 0.5 && isTouchpadUpHoldL) ? true : false;
+        bool isYAxisHold =  (vec2TouchpadAxisL.y < -0.5 && isTouchpadDownHoldL) || (vec2TouchpadAxisL.y > 0.25 && isTouchpadUpHoldL) ? true : false;
         float preAngle = ScanningAngle;
         float lastLayer = Cone.GetComponent<ConeScript>().getMaxLayer();
         // Reset
@@ -578,6 +582,7 @@ public class DroneCasting : MonoBehaviour
             return;
         }
 
+        // Adjust
         if (GameManager.Instance.getMode() == CASTING_MODE.DroneLayer)
         {
             // Auto Adjust
@@ -628,7 +633,7 @@ public class DroneCasting : MonoBehaviour
         else
         if(GameManager.Instance.getMode() == CASTING_MODE.DroneLayer)
         {
-            if (vec2TouchpadAxisL.y > 0.5 && isTouchpadUpPressL && AutoUpdating == AutoState.None)
+            if (vec2TouchpadAxisL.y > 0.25 && isTouchpadUpPressL && AutoUpdating == AutoState.None)
             {
                 if (CurrentLayer == 0) return;
                 CurrentLayer -= 1;
@@ -645,10 +650,11 @@ public class DroneCasting : MonoBehaviour
         else
         if(GameManager.Instance.getMode() == CASTING_MODE.DroneDepth)
         {
-            if (vec2TouchpadAxisL.y > 0.5 && isTouchpadUpPressL)
+            if (vec2TouchpadAxisL.y > 0.25 && isTouchpadUpPressL)
             {
                 if (ScanningDepth - DeltaDepth <= 0) return;
                 ScanningDepth -= DeltaDepth;
+                Debug.Log(ScanningDepth);
             }
             else
             if (vec2TouchpadAxisL.y < 0.5 && isTouchpadDownPressL)
@@ -657,7 +663,7 @@ public class DroneCasting : MonoBehaviour
             }
         }
 
-        if (ScanningAngle == preAngle) // skip the caculation and physical change if doesn't change
+        if (ScanningAngle == preAngle) // skip the caculation and physical change if angle doesn't change
             return;
 
         CurrentLayer = 0;
@@ -792,11 +798,6 @@ public class DroneCasting : MonoBehaviour
         float distance = 0;
         while (i < coveredTargets.Length)
         {
-            //if (coveredTargets[i].name == "MainSphere" || coveredTargets[i].tag == "NoCopy" || coveredTargets[i].tag == "Floor")
-            //{
-            //    i++;
-            //    continue;
-            //}
             sum += coveredTargets[i].transform.position - center;
             i++;
         }
@@ -804,21 +805,17 @@ public class DroneCasting : MonoBehaviour
         i = 0;
         while (i < coveredTargets.Length)
         {
-            //if (coveredTargets[i].name == "MainSphere" || coveredTargets[i].tag == "NoCopy" || coveredTargets[i].tag == "Floor")
-            //{
-            //    i++;
-            //    continue;
-            //}
             // realdis represents the offset relative to the center of the casting sphere
             realdis[i] = coveredTargets[i].transform.position - objCenter;
-            Ray ray = new Ray(objCenter + 100 * (coveredTargets[i].bounds.center - objCenter), objCenter - coveredTargets[i].bounds.center);
+            Vector3 rayVector = coveredTargets[i].bounds.center - objCenter;
+            Ray ray = new Ray(objCenter + 20 * rayVector, objCenter - coveredTargets[i].bounds.center);
             RaycastHit hit;
             if (objCenter == coveredTargets[i].bounds.center)
             {
                 distance = Vector3.Distance(Vector3.zero, coveredTargets[i].bounds.size) / 2;
             }
             else
-            if (coveredTargets[i].Raycast(ray, out hit, 2000.0f))
+            if (coveredTargets[i].Raycast(ray, out hit, 25 * (rayVector.magnitude)))
             {
                 distance = Vector3.Distance(hit.point, objCenter);
             }
@@ -942,14 +939,14 @@ public class DroneCasting : MonoBehaviour
             // realdis represents the offset relative to the center of the casting sphere
             realdis[i] = coveredTargets[i].transform.position - objCenter;
             Vector3 rayVector = coveredTargets[i].bounds.center - objCenter;
-            Ray ray = new Ray(objCenter + 30 * rayVector, objCenter - coveredTargets[i].bounds.center);
+            Ray ray = new Ray(objCenter + 20 * rayVector, objCenter - coveredTargets[i].bounds.center);
             RaycastHit hit;
             if (objCenter == coveredTargets[i].bounds.center)
             {
                 distance = Vector3.Distance(Vector3.zero, coveredTargets[i].bounds.size) / 2;
             }
             else
-            if (coveredTargets[i].Raycast(ray, out hit, 40*(rayVector.magnitude)))
+            if (coveredTargets[i].Raycast(ray, out hit, 25 * (rayVector.magnitude)))
             {
                 distance = Vector3.Distance(hit.point, objCenter);
             }

@@ -89,6 +89,7 @@ public class ConeCollision : MonoBehaviour
         List<Collider> FilteredColliders = new List<Collider>();
         foreach(var c in colliders)
         {
+            if (c == null) continue;
             if( ((1 << c.gameObject.layer) & layermask) != 0)
             {
                 FilteredColliders.Add(c);
