@@ -26,6 +26,7 @@ public class Wim : MonoBehaviour
     [SerializeField]
     private Vector3 wimSize = new Vector3(0.005f, 0.005f, 0.005f);
     private GameObject globalWim, localWim, userTransform;
+    private Transform WimCenter; 
     [SerializeField]
     private Transform globalWimDefaultPos;
     [SerializeField]
@@ -41,6 +42,9 @@ public class Wim : MonoBehaviour
 
     private Transform globalWimBoundary;
     private Transform roiBoundary;
+
+    private Vector3 worldCenter;
+    private GameObject worldRoi;
 
     // Start is called before the first frame update
     void Start()
@@ -61,6 +65,7 @@ public class Wim : MonoBehaviour
         UpdateLocalWimSize();
         UpdateLocalWimPos();
         UpdateGlobalWimPos();
+        UpdateWorldRoi();
         ToggleVisibility();
     }
 
@@ -82,12 +87,13 @@ public class Wim : MonoBehaviour
         world = GameObject.Find("World");
         leftController = GameObject.Find("Controller (left)");
         rightController = GameObject.Find("Controller (right)");
-        userTransform = GameObject.Find("CameraPos"); ;
+        userTransform = GameObject.Find("CameraPos"); 
         Cam = userTransform.GetComponent<Camera>();
-
         globalWimLayer = LayerMask.NameToLayer("Global Wim");
         localWimLayer = LayerMask.NameToLayer("Local Wim");
-
+        WimCenter = GameObject.Find("WimPos").transform;
+        worldCenter = world.transform.Find("WimBoundary").GetComponent<BoxCollider>().bounds.center;
+        worldRoi = world.transform.Find("ROI").gameObject;
     }
 
     void CreateWim()
@@ -104,7 +110,7 @@ public class Wim : MonoBehaviour
 
         roiController = globalWim.GetComponentInChildren<RoiController>();
         roiController.enabled = true;
-        roiController.setUnit((wimSize.x + wimSize.y + wimSize.z)/3 * 10);
+        roiController.setUnit((wimSize.x + wimSize.y + wimSize.z)/3 * 30);
 
         globalWimBoundary = globalWim.transform.Find("WimBoundary");
         roiBoundary = roiSensor.transform.Find("RoiCollider");
@@ -114,7 +120,7 @@ public class Wim : MonoBehaviour
         localWim.transform.position = localWimDefaultPos.position;
         SetWimObjLayer(localWim, localWimLayer);
         localWim.transform.Find("ROI").gameObject.SetActive(false);
-        world.transform.Find("ROI").gameObject.SetActive(false);
+        //worldRoi.SetActive(false);
     }
 
     void InitRoiTracking()
@@ -253,27 +259,29 @@ public class Wim : MonoBehaviour
 
     private void UpdateLocalWimPos()
     {
-        Vector3 CamFrontProjXZ = Cam.transform.forward;
-        Vector3 CamDownParaY = -Cam.transform.up;
-        CamFrontProjXZ.y = 0;
-        CamDownParaY.x = 0; CamDownParaY.z = 0;
-        CamFrontProjXZ.Normalize();
-        CamDownParaY.Normalize();
-        float offset = (Vector3.Angle(Vector3.up, Cam.transform.forward) - 90) / 90.0f;
-        localWimDefaultPos.position = Cam.transform.position + CamFrontProjXZ * 11 / 20 + CamDownParaY / 5 + CamDownParaY * offset - CamDownParaY / 6.5f;
-        
+        //Vector3 CamFrontProjXZ = Cam.transform.forward;
+        //Vector3 CamDownParaY = -Cam.transform.up;
+        //CamFrontProjXZ.y = 0;
+        //CamDownParaY.x = 0; CamDownParaY.z = 0;
+        //CamFrontProjXZ.Normalize();
+        //CamDownParaY.Normalize();
+        //float offset = (Vector3.Angle(Vector3.up, Cam.transform.forward) - 90) / 90.0f;
+        //localWimDefaultPos.position = Cam.transform.position + CamFrontProjXZ * 11 / 20 + CamDownParaY / 5 + CamDownParaY * offset - CamDownParaY / 6.5f;
+
         localWim.transform.position = localWimDefaultPos.position + (localWim.transform.position - trackingRoiLocalPosition.transform.position);
     }
 
     private void UpdateGlobalWimPos()
     {
-        globalWimDefaultPos.position = leftController.transform.position + new Vector3(0,0.05f,0);
-        Vector3 CenterCorrection = globalWim.transform.position - globalWimBoundary.GetComponent<BoxCollider>().bounds.center;
-        Vector3 AwayFromUser = globalWimDefaultPos.position - userTransform.transform.position;
-        AwayFromUser.y = 0;
-        AwayFromUser.Normalize();
-        AwayFromUser *= 0.125f;
-        globalWim.transform.position = globalWimDefaultPos.position + CenterCorrection + AwayFromUser;
+        //globalWimDefaultPos.position = leftController.transform.position + new Vector3(0, 0.05f, 0);
+        //Vector3 CenterCorrection = globalWim.transform.position - globalWimBoundary.GetComponent<BoxCollider>().bounds.center;
+        //Vector3 AwayFromUser = globalWimDefaultPos.position - userTransform.transform.position;
+        //AwayFromUser.y = 0;
+        //AwayFromUser.Normalize();
+        //AwayFromUser *= 0.125f;f
+        //globalWim.transform.position = globalWimDefaultPos.position + CenterCorrection + AwayFromUser;
+
+        globalWim.transform.position = globalWimDefaultPos.position;
     }
 
     private void ToggleVisibility()
@@ -287,6 +295,12 @@ public class Wim : MonoBehaviour
         {
             globalWim.SetActive(!globalWim.activeSelf);
         }
+    }
+    private void UpdateWorldRoi()
+    {
+        Vector3 dis = roiSensor.transform.position - globalWimBoundary.position;
+        dis /= wimSize.x;
+        worldRoi.transform.position = worldCenter + dis;
     }
 
 }

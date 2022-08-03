@@ -62,11 +62,13 @@ public class RoiController : MonoBehaviour
         getInput();
 
         if (TriggerHoldR)
+        {
             HomerControl();
+        }
         else
         {
-            firstTrigger = false;
             HorizontalMovement();
+            firstTrigger = false;
         }
     }
 
@@ -96,7 +98,7 @@ public class RoiController : MonoBehaviour
 
     /**
      * <summary>
-     * Move the drone like hand-controlled object.
+     * Move the ROI with HOMER.
      * </summary>
      */
     private void HomerControl()
@@ -136,7 +138,7 @@ public class RoiController : MonoBehaviour
 
     /**
     * <summary>
-    * This function controlls the drone at horiztional movement
+    * This function controlls the ROI at horiztional movement
     * </summary>
     */
     private void HorizontalMovement()
@@ -158,19 +160,19 @@ public class RoiController : MonoBehaviour
                 jumpDistance = unit * Vector3.back;
             transform.Translate(jumpDistance);
         }
-        else
-        {
-            float speed = 0.0f;
-            if (TouchpadAxisR.magnitude > 0.9)
-                speed = 3.0f;
-            else if (TouchpadAxisR.magnitude > 0.5)
-                speed = 2.0f;
-            else if (TouchpadAxisR.magnitude > 0.3)
-                speed = 1.0f;
-            else
-                speed = 0.0f;
-            var velocity = speed * unit * (TouchpadAxisR.x * Vector3.right + TouchpadAxisR.y * Vector3.forward);
-            transform.Translate(velocity * Time.deltaTime);
-        }
+        //else
+        //{
+        //    float speed = 0.0f;
+        //    if (TouchpadAxisR.magnitude > 0.9)
+        //        speed = 3.0f;
+        //    else if (TouchpadAxisR.magnitude > 0.5)
+        //        speed = 2.0f;
+        //    else if (TouchpadAxisR.magnitude > 0.3)
+        //        speed = 1.0f;
+        //    else
+        //        speed = 0.0f;
+        //    var velocity = speed * unit * (TouchpadAxisR.x * Vector3.right + TouchpadAxisR.y * Vector3.forward);
+        //    transform.Translate(velocity * Time.deltaTime);
+        //}
     }
 }
