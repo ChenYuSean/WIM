@@ -10,17 +10,7 @@ public class Wim : MonoBehaviour
     private GameObject leftController, rightController;
     private Camera Cam;
 
-    // VR Actions
-    private SteamVR_Action_Boolean m_TriggerPress;
-    private SteamVR_Action_Boolean m_Touchpad_N_Press;
-    private SteamVR_Action_Boolean m_Touchpad_S_Press;
-    private SteamVR_Action_Boolean m_Touchpad_E_Press;
-    private SteamVR_Action_Boolean m_Touchpad_W_Press;
-    private SteamVR_Action_Vector2 m_touchpadAxis;
-    private SteamVR_Action_Boolean m_Menu;
-    // VR Inputs
-    private bool MenuPressR;
-    private bool MenuPressL;
+    private InputManager IM;
 
     private List<GameObject> wimObjectBuffer;
     [SerializeField]
@@ -28,9 +18,13 @@ public class Wim : MonoBehaviour
     private GameObject globalWim, localWim, userTransform;
     private Transform WimCenter; 
     [SerializeField]
-    private Transform globalWimDefaultPos;
+    private Transform GlobalWimDefaultPos;
     [SerializeField]
-    private Transform localWimDefaultPos;
+    private Transform LocalWimDefaultPos;
+
+    private Vector3 GlobalPosOffset;
+    private Vector3 LocalPosOffset;
+
 
     private LayerMask globalWimLayer;
     private LayerMask localWimLayer;
@@ -39,12 +33,16 @@ public class Wim : MonoBehaviour
     private TriggerSensor roiSensor;
     private RoiController roiController;
     private GameObject trackingRoiLocalPosition;
+    private GameObject trackingRoiGlobalPosition;
+
 
     private Transform globalWimBoundary;
     private Transform roiBoundary;
 
     private Vector3 worldCenter;
     private GameObject worldRoi;
+
+    
 
     // Start is called before the first frame update
     void Start()
@@ -54,14 +52,14 @@ public class Wim : MonoBehaviour
         BindingWim();
         HideLocalWim();
         InitRoiTracking();
-        SetVRAction();
+        StartCoroutine(UpdateCamera());
     }
 
     // Update is called once per frame
     void Update()
     {
-        getInput();
         TrackingRoiPos();
+        UpdateDefaultPos();
         UpdateLocalWimSize();
         UpdateLocalWimPos();
         UpdateGlobalWimPos();
@@ -70,17 +68,6 @@ public class Wim : MonoBehaviour
     }
 
     // Belowed functions run during start 
-
-    void SetVRAction()
-    {
-        m_TriggerPress = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("PressTrigger");
-        m_touchpadAxis = SteamVR_Input.GetAction<SteamVR_Action_Vector2>("TouchTouchpad");
-        m_Touchpad_N_Press = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("PressTouchpadN");
-        m_Touchpad_S_Press = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("PressTouchpadS");
-        m_Touchpad_E_Press = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("SnapTurnRight");
-        m_Touchpad_W_Press = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("SnapTurnLeft");
-        m_Menu = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("PressApplicationMenu");
-    }
 
     void InitEnv()
     {
@@ -94,13 +81,21 @@ public class Wim : MonoBehaviour
         WimCenter = GameObject.Find("WimPos").transform;
         worldCenter = world.transform.Find("WimBoundary").GetComponent<BoxCollider>().bounds.center;
         worldRoi = world.transform.Find("ROI").gameObject;
+        IM = GetComponent<InputManager>();
+    }
+
+    private IEnumerator UpdateCamera()
+    {
+        yield return new WaitForSeconds(0.2f);
+        GlobalWimDefaultPos.parent.position = Cam.transform.position;
     }
 
     void CreateWim()
     {
         globalWim = Instantiate(world);
+        globalWim.name = "GlobalWim";
         globalWim.transform.localScale = wimSize;
-        globalWim.transform.position = globalWimDefaultPos.position;
+        globalWim.transform.position = GlobalWimDefaultPos.position;
         SetWimObjLayer(globalWim, globalWimLayer);
 
         roiSensor = globalWim.GetComponentInChildren<TriggerSensor>();
@@ -109,18 +104,21 @@ public class Wim : MonoBehaviour
         roiSensor.isROI = true;
 
         roiController = globalWim.GetComponentInChildren<RoiController>();
-        roiController.enabled = true;
+        //roiController.enabled = true;
         roiController.setUnit((wimSize.x + wimSize.y + wimSize.z)/3 * 30);
+
+        globalWim.transform.Find("ROI").GetComponent<RoiGrab>().enabled = true;
 
         globalWimBoundary = globalWim.transform.Find("WimBoundary");
         roiBoundary = roiSensor.transform.Find("RoiCollider");
 
         localWim = Instantiate(world);
+        localWim.name = "LocalWim";
         localWim.transform.localScale = wimSize;
-        localWim.transform.position = localWimDefaultPos.position;
+        localWim.transform.position = LocalWimDefaultPos.position;
         SetWimObjLayer(localWim, localWimLayer);
         localWim.transform.Find("ROI").gameObject.SetActive(false);
-        //worldRoi.SetActive(false);
+        worldRoi.GetComponentInChildren<MeshRenderer>().enabled = true;
     }
 
     void InitRoiTracking()
@@ -128,7 +126,12 @@ public class Wim : MonoBehaviour
         trackingRoiLocalPosition = new GameObject("Tracking Roi Local Position");
         trackingRoiLocalPosition.transform.parent = localWim.transform;
 
+        trackingRoiGlobalPosition = new GameObject("Tracking Roi Global Position");
+        trackingRoiGlobalPosition.transform.parent = globalWim.transform;
+
     }
+
+    
 
 
     private void BindingWim()
@@ -225,12 +228,6 @@ public class Wim : MonoBehaviour
 
     // Belowed fuctions run every update 
 
-    private void getInput()
-    {
-        MenuPressR = m_Menu.GetStateDown(SteamVR_Input_Sources.RightHand);
-        MenuPressL = m_Menu.GetStateDown(SteamVR_Input_Sources.LeftHand);
-    }
-
     private void TrackingRoiPos()
     {
         if (trackingRoiLocalPosition != null)
@@ -268,7 +265,31 @@ public class Wim : MonoBehaviour
         //float offset = (Vector3.Angle(Vector3.up, Cam.transform.forward) - 90) / 90.0f;
         //localWimDefaultPos.position = Cam.transform.position + CamFrontProjXZ * 11 / 20 + CamDownParaY / 5 + CamDownParaY * offset - CamDownParaY / 6.5f;
 
-        localWim.transform.position = localWimDefaultPos.position + (localWim.transform.position - trackingRoiLocalPosition.transform.position);
+        List<GameObject> RoiObject = roiSensor.GetDetected();
+
+        //string s = "";
+        //foreach(var obj in RoiObject)
+        //{
+        //    s += obj.name;
+        //    s += ", ";
+        //}
+        //Debug.Log(s);
+
+        Vector3 sum = Vector3.zero;
+        for(int i = 0; i < RoiObject.Count; i++)
+        {
+            if (RoiObject[i].tag == "Arrow") continue;
+            sum += RoiObject[i].transform.position;
+        }
+
+        Vector3 centerPosOfRoi = sum / (RoiObject.Count-1);
+
+        trackingRoiGlobalPosition.transform.position = centerPosOfRoi;
+
+        trackingRoiLocalPosition.transform.localPosition = trackingRoiGlobalPosition.transform.localPosition;
+
+
+        localWim.transform.position = LocalWimDefaultPos.position + (localWim.transform.position - trackingRoiLocalPosition.transform.position);
     }
 
     private void UpdateGlobalWimPos()
@@ -281,17 +302,17 @@ public class Wim : MonoBehaviour
         //AwayFromUser *= 0.125f;f
         //globalWim.transform.position = globalWimDefaultPos.position + CenterCorrection + AwayFromUser;
 
-        globalWim.transform.position = globalWimDefaultPos.position;
+        globalWim.transform.position = GlobalWimDefaultPos.position;
     }
 
     private void ToggleVisibility()
     {
-        if(MenuPressR)
+        if(IM.RightHand().Menu.press)
         {
             localWim.SetActive(!localWim.activeSelf);
         }
 
-        if (MenuPressL)
+        if (IM.LeftHand().Menu.press)
         {
             globalWim.SetActive(!globalWim.activeSelf);
         }
@@ -303,4 +324,19 @@ public class Wim : MonoBehaviour
         worldRoi.transform.position = worldCenter + dis;
     }
 
+    private void UpdateDefaultPos()
+    {
+    }
+
+    // Belowed function are Private functions
+
+
+    // Belowed fuctions are Public API
+    public void Teleport()
+    {
+        var pos = worldRoi.transform.position;
+        pos.y = 100;
+        pos.z += 150;
+        transform.position = pos;
+    }
 }

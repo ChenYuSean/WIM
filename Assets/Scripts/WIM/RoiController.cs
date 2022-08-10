@@ -13,26 +13,13 @@ using HighlightPlus;
  */
 public class RoiController : MonoBehaviour
 {
-    private SteamVR_Action_Boolean m_TriggerPress;
-    private SteamVR_Action_Boolean m_Touchpad_N_Press;
-    private SteamVR_Action_Boolean m_Touchpad_S_Press;
-    private SteamVR_Action_Boolean m_Touchpad_E_Press;
-    private SteamVR_Action_Boolean m_Touchpad_W_Press;
-    private SteamVR_Action_Vector2 m_touchpadAxis;
 
+    private InputManager IM;
+    private Wim Wim;
 
     public GameObject controllerRight;
     public GameObject controllerLeft;
-
     public Camera Cam;
-
-    private bool TriggerHoldR;
-    private Vector2 TouchpadAxisR;
-    private bool UpPressR;
-    private bool RightPressR;
-    private bool DownPressR;
-    private bool LeftPressR;
-    private bool MenuPressR;
 
     // for homer controll
     private bool firstTrigger = false;
@@ -43,31 +30,29 @@ public class RoiController : MonoBehaviour
     //
     private float unit = 1.0f; // unit distance of movement
 
-
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        m_TriggerPress = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("PressTrigger");
-        m_touchpadAxis = SteamVR_Input.GetAction<SteamVR_Action_Vector2>("TouchTouchpad");
-        m_Touchpad_N_Press = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("PressTouchpadN");
-        m_Touchpad_S_Press = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("PressTouchpadS");
-        m_Touchpad_E_Press = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("SnapTurnRight");
-        m_Touchpad_W_Press = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("SnapTurnLeft");
-
+        // InputManager and Wim are attached to CameraRig
+        GameObject CameraRig = GameObject.Find("[CameraRig]");
+        IM = CameraRig.GetComponent<InputManager>();
+        Wim = CameraRig.GetComponent<Wim>();
     }
 
     // Update is called once per fix time
     void FixedUpdate()
     {
-        getInput();
 
-        if (TriggerHoldR)
+        if (IM.RightHand().Trigger.hold)
         {
             HomerControl();
         }
+        else 
+        if(IM.RightHand().Trigger.release)
+        {
+            Wim.Teleport();
+        }
         else
         {
-            HorizontalMovement();
             firstTrigger = false;
         }
     }
@@ -78,22 +63,6 @@ public class RoiController : MonoBehaviour
     public void setUnit(float u)
     {
         unit = u;
-    }
-
-    /**
-     * <summary>
-     * Call this function to get the controller input
-     * </summary>
-     */
-    private void getInput()
-    {
-        TriggerHoldR = m_TriggerPress.GetState(SteamVR_Input_Sources.RightHand);
-        TouchpadAxisR = m_touchpadAxis.GetAxis(SteamVR_Input_Sources.RightHand);
-        UpPressR = m_Touchpad_N_Press.GetStateDown(SteamVR_Input_Sources.RightHand);
-        RightPressR = m_Touchpad_E_Press.GetStateDown(SteamVR_Input_Sources.RightHand);
-        DownPressR = m_Touchpad_S_Press.GetStateDown(SteamVR_Input_Sources.RightHand);
-        LeftPressR = m_Touchpad_W_Press.GetStateDown(SteamVR_Input_Sources.RightHand);
-
     }
 
     /**
@@ -134,45 +103,5 @@ public class RoiController : MonoBehaviour
         diff.y = 0;
         float initDroneDistance = diff.magnitude;
         DistanceScale = initDroneDistance / initHandDistance;
-    }
-
-    /**
-    * <summary>
-    * This function controlls the ROI at horiztional movement
-    * </summary>
-    */
-    private void HorizontalMovement()
-    {
-        if (DownPressR || LeftPressR || RightPressR || UpPressR)
-        {
-            float jumpAmount = 1.0f;
-            Vector3 jumpDistance = Vector3.zero;
-            if (TouchpadAxisR.x > 0.5 && RightPressR)
-                jumpDistance = jumpAmount * unit * Vector3.right;
-            else
-            if (TouchpadAxisR.x < -0.5 && LeftPressR)
-                jumpDistance = jumpAmount * unit * Vector3.left;
-            else
-            if (TouchpadAxisR.y > 0.5 && UpPressR)
-                jumpDistance = jumpAmount * unit * Vector3.forward;
-            else
-            if (TouchpadAxisR.y < -0.5 && DownPressR)
-                jumpDistance = unit * Vector3.back;
-            transform.Translate(jumpDistance);
-        }
-        //else
-        //{
-        //    float speed = 0.0f;
-        //    if (TouchpadAxisR.magnitude > 0.9)
-        //        speed = 3.0f;
-        //    else if (TouchpadAxisR.magnitude > 0.5)
-        //        speed = 2.0f;
-        //    else if (TouchpadAxisR.magnitude > 0.3)
-        //        speed = 1.0f;
-        //    else
-        //        speed = 0.0f;
-        //    var velocity = speed * unit * (TouchpadAxisR.x * Vector3.right + TouchpadAxisR.y * Vector3.forward);
-        //    transform.Translate(velocity * Time.deltaTime);
-        //}
     }
 }
