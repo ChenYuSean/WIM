@@ -46,7 +46,7 @@ public class Wim : MonoBehaviour
         BindingWim();
         HideLocalWim();
         InitRoiTracking();
-        StartCoroutine(UpdateCamera());
+        PosCorrection();
     }
 
     // Update is called once per frame
@@ -75,12 +75,6 @@ public class Wim : MonoBehaviour
         worldCenter = world.transform.Find("WimBoundary").GetComponent<BoxCollider>().bounds.center;
         worldRoi = world.transform.Find("ROI").gameObject;
         IM = GetComponent<InputManager>();
-    }
-
-    private IEnumerator UpdateCamera()
-    {
-        yield return new WaitForSeconds(1.0f);
-        GlobalWimDefaultPos.parent.position = Cam.transform.position;
     }
 
     void CreateWim()
@@ -119,9 +113,6 @@ public class Wim : MonoBehaviour
         trackingRoiGlobalPosition.transform.parent = globalWim.transform;
 
     }
-
-    
-
 
     private void BindingWim()
     {
@@ -215,6 +206,17 @@ public class Wim : MonoBehaviour
         }
     }
 
+    private void PosCorrection()
+    {
+        StartCoroutine(UpdateCamera());
+        Teleport();
+    }
+
+    private IEnumerator UpdateCamera()
+    {
+        yield return new WaitForSeconds(1.0f);
+        GlobalWimDefaultPos.parent.position = Cam.transform.position;
+    }
     // Belowed functions called during Update
 
     private void TrackingRoiPos()
@@ -328,8 +330,6 @@ public class Wim : MonoBehaviour
         if(IM.RightHand().Menu.press)
             GlobalWimDefaultPos.parent.position = Cam.transform.position;
     }
-
-    // Belowed function are Private 
 
 
     // Belowed fuctions are Public

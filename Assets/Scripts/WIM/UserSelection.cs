@@ -8,11 +8,18 @@ public class UserSelection : MonoBehaviour
     public GameObject leftController;
     public GameObject rightController;
 
+    private GameObject BubbleDiskR;
+    private GameObject BubbleDiskL;
+
     private Linedrawer leftRay;
     private Linedrawer rightRay;
     private bool draw = false;
+
+    private float RayLengthR = 1000;
+    private float RayLengthL = 1000;
     void Start()
     {
+        InitEnv();
         InitLineDrawer();
     }
 
@@ -23,19 +30,27 @@ public class UserSelection : MonoBehaviour
     }
     
     // Belowed functions called on Start
+    private void InitEnv()
+    {
+        BubbleDiskL = leftController.transform.Find("Bubble").gameObject;
+        BubbleDiskR = rightController.transform.Find("Bubble").gameObject;
+    }
+    
     private void InitLineDrawer()
     {
         leftRay = new Linedrawer();
         rightRay = new Linedrawer();
         draw = true;
     }
+
+
     // Belowed functions called during Update
     private void DrawLine()
     {
         if(draw)
         {
-            var left_end = leftController.transform.position + leftController.transform.forward * 1000;
-            var right_end = rightController.transform.position + rightController.transform.forward * 1000;
+            var left_end = leftController.transform.position + leftController.transform.forward * RayLengthL;
+            var right_end = rightController.transform.position + rightController.transform.forward * RayLengthR;
             leftRay.DrawLineInGameView(leftController.transform.position,left_end,Color.red);
             //rightRay.DrawLineInGameView(rightController.transform.position,right_end,Color.red);
         }
@@ -43,9 +58,7 @@ public class UserSelection : MonoBehaviour
 
     private void RayCasting()
     {
-        RaycastHit hit;
-        Physics.Raycast(leftController.transform.position, leftController.transform.forward, out hit, LayerMask.NameToLayer("Background"));
-        Debug.Log(hit.transform.name);
+        BubbleMechanism(false, LayerMask.NameToLayer("Local Wim"));
     }
 
     // Belowed functions are Private
@@ -63,20 +76,33 @@ public class UserSelection : MonoBehaviour
         }
     }
 
-    GameObject BubbleMechanism(Vector3 origin, Vector3 direction, int layermask, char LorR)
+    /**
+     * 
+     * <summary>
+     * Bubble Mechanism. <paramref name="isRight"/> determined the ray is casted at right or left.
+     * </summary>
+     * <param name="isRight"> True if casting from right hand, otherwise it's casting from left hand.</param>
+     */
+    GameObject BubbleMechanism(bool isRight,int layermask)
     {
-        float bubbleSize = 0f ;
-        Vector3 RayOriginR = Vector3.zero;
-        Vector3 RayOriginL = Vector3.zero;
-        Vector3 RayDirectionR = Vector3.zero;
-        Vector3 RayDirectionL = Vector3.zero;
+        float bubbleSize = 0.01f ;
+        Vector3 RayOriginR = rightController.transform.position;
+        Vector3 RayOriginL = leftController.transform.position;
+        Vector3 RayDirectionR = rightController.transform.forward;
+        Vector3 RayDirectionL = leftController.transform.forward;
+
+
+        Vector3 origin = isRight ? RayOriginR : RayOriginL;
+        Vector3 direction = isRight ? RayDirectionR : RayDirectionL;
 
         Collider[] selectableObjects = Physics.OverlapSphere(origin, float.MaxValue, layermask);
         if (selectableObjects.Length == 0)
         {
+            //Debug.Log("NO overlap");
             return null;
         }
         var nearestObj = selectableObjects[0].gameObject;
+        Debug.Log(nearestObj.name);
 
         int i = 0;
         float mindist = float.MaxValue;
@@ -103,7 +129,7 @@ public class UserSelection : MonoBehaviour
         }
         if (nearestObj != null)
         {
-            if (LorR == 'r')
+            if (isRight)
             {
                 Vector3 point = nearestObj.transform.position;
                 Vector3 vec1 = point - RayOriginR;
@@ -162,13 +188,14 @@ public class UserSelection : MonoBehaviour
         }
         else
         {
-            if (LorR == 'r')
+            if (isRight)
                 BubbleDiskR.SetActive(false);
             else
                 BubbleDiskL.SetActive(false);
         }
         return nearestObj;
     }
+    
 
     float DisPoint2Line(Collider obj, Vector3 ori, Vector3 dir)
     {

@@ -8,6 +8,8 @@ TagManager:
   - Arrow
   - RayEndPoint
   - Targets
+  - projectile
+  - FxTemporaire
   layers:
   - Default
   - TransparentFX
@@ -17,7 +19,7 @@ TagManager:
   - UI
   - 
   - 
-  - Arrow
+  - CollisionDetect
   - UnchangeableObjects
   - Background
   - Global Wim
