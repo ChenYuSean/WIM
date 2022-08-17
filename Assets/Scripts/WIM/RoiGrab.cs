@@ -62,9 +62,10 @@ public class RoiGrab : MonoBehaviour
         }
     }
 
-    /**
+    /**<summary>
      * Return original position if it isn't out of boundary,
      * Or else, set the corresponding coordinate to boundary point
+     * </summary>
      */
     private Vector3 BoundaryCheck(Vector3 pos)
     {

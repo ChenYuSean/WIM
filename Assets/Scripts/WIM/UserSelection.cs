@@ -32,6 +32,11 @@ public class UserSelection : MonoBehaviour
     }
     
     // Belowed functions called on Start
+    /**
+     * <summary>
+     * Initiate the variable
+     * </summary>
+     */
     private void InitEnv()
     {
         BubbleDiskL = leftController.transform.Find("Bubble").gameObject;
@@ -40,7 +45,12 @@ public class UserSelection : MonoBehaviour
         BubbleDiskR.SetActive(false);
         IM = GetComponent<InputManager>();
     }
-    
+
+    /**
+     * <summary>
+     * Construct the line drawer of drawing ray
+     * </summary>
+     */
     private void InitLineDrawer()
     {
         leftRay = new Linedrawer();
@@ -50,6 +60,11 @@ public class UserSelection : MonoBehaviour
 
 
     // Belowed functions called during Update
+    /**
+     * <summary>
+     * Draw the ray in Scene
+     * </summary>
+     */
     private void DrawLine()
     {
         if(draw)
@@ -61,6 +76,11 @@ public class UserSelection : MonoBehaviour
         }
     }
 
+    /**
+     * <summary>
+     * Select the object by ray. The Bubble Mechanism is used.
+     * </summary>
+     */
     private void RayCasting()
     {
         int layerMask = 1 << LayerMask.NameToLayer("Local Wim");
@@ -70,7 +90,10 @@ public class UserSelection : MonoBehaviour
             Debug.Log(selectedObj.name + " selected");
         }
     }
-
+    /**
+     *<summary>
+     * Turn on or off the line drawer. Also clear the line in scene when turn off.
+     */
     private void ToggleDraw(bool OnOff)
     {
         if(OnOff)
@@ -88,7 +111,8 @@ public class UserSelection : MonoBehaviour
     /**
      * 
      * <summary>
-     * Bubble Mechanism. <paramref name="isRight"/> determined the ray is casted at right or left.
+     * Bubble Mechanism is used for selected the closest object to the ray.Has the 5 degree of tolerance between ray and target.<br/> 
+     * <paramref name="isRight"/> determined the ray is casted at right or left.
      * </summary>
      * <param name="isRight"> True if casting from right hand, otherwise it's casting from left hand.</param>
      */
@@ -203,8 +227,11 @@ public class UserSelection : MonoBehaviour
         }
         return nearestObj;
     }
-    
 
+    /**
+     * <summary>
+     * calculate the distance betweem object and the ray. Using origin and direction to determine the ray.
+     */
     float DisPoint2Line(Collider obj, Vector3 ori, Vector3 dir)
     {
         Vector3 point = obj.transform.position;
@@ -215,5 +242,6 @@ public class UserSelection : MonoBehaviour
         float trueDis = Vector3.Distance(ori + vecProj, nearstPointOnCollider);
         return trueDis;
     }
+
     // Belowed functions are Public
 }

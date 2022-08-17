@@ -62,7 +62,11 @@ public class Wim : MonoBehaviour
     }
 
     // Belowed functions called on Start
-
+    /**
+     * <summary>
+     * Initiate the variable
+     * </summary>
+     */
     void InitEnv()
     {
         world = GameObject.Find("World");
@@ -77,6 +81,11 @@ public class Wim : MonoBehaviour
         IM = GetComponent<InputManager>();
     }
 
+    /**
+     * <summary>
+     * Create global and local wim. Turn on the <see cref="RoiGrab"/> and <see cref="TriggerSensor"/> on Global Roi.
+     * </summary>
+     */
     void CreateWim()
     {
         globalWim = Instantiate(world);
@@ -104,24 +113,26 @@ public class Wim : MonoBehaviour
         worldRoi.GetComponentInChildren<MeshRenderer>().enabled = true;
     }
 
+    /**
+     * <summary>
+     * Generate two game object to track local position of roi in local and global.
+     * </summary>
+     */
     void InitRoiTracking()
     {
         trackingRoiLocalPosition = new GameObject("Tracking Roi Local Position");
         trackingRoiLocalPosition.transform.parent = localWim.transform;
 
-        trackingRoiGlobalPosition = new GameObject("Tracking Roi Global Position");
+        trackingRoiGlobalPosition = new GameObject("Tracking Roi Local Position");
         trackingRoiGlobalPosition.transform.parent = globalWim.transform;
 
     }
 
-    private void BindingWim()
-    {
-        wimObjectBuffer = new List<GameObject>();
-        SaveWimObjInBuffer(globalWim);
-        currentBufferIndex = 0;
-        BindingObjByBuffer(localWim);
-    }
-
+    /**
+     * <summary>
+     * Set the layer to the object and its child recursively.
+     * </summary>
+     */
     void SetWimObjLayer(GameObject obj, int newLayer)
     {
         if (null == obj)
@@ -139,6 +150,20 @@ public class Wim : MonoBehaviour
             }
             SetWimObjLayer(child.gameObject, newLayer);
         }
+    }
+
+    /**
+     * <summary>
+     * Binding the local and global object in wim.<br/>
+     * <see cref="SaveWimObjInBuffer"/> and <see cref="BindingObjByBuffer"/> are subfuction where used. 
+     * </summary>
+     */
+    private void BindingWim()
+    {
+        wimObjectBuffer = new List<GameObject>();
+        SaveWimObjInBuffer(globalWim);
+        currentBufferIndex = 0;
+        BindingObjByBuffer(localWim);
     }
 
     private void SaveWimObjInBuffer(GameObject obj)
@@ -169,7 +194,6 @@ public class Wim : MonoBehaviour
         }
     }
 
-
     private void BindingObjByBuffer(GameObject objectInLocalWim)
     {
         if (null == objectInLocalWim)
@@ -197,6 +221,11 @@ public class Wim : MonoBehaviour
         }
     }
 
+    /**
+     * <summary>
+     * Deactivate the object in local wim
+     * </summary>
+     */
     private void HideLocalWim()
     {
         Collider[] cs = localWim.GetComponentsInChildren<Collider>();
@@ -206,6 +235,11 @@ public class Wim : MonoBehaviour
         }
     }
 
+    /**
+     * <summary>
+     * Correct the position in the startup, Camera will correct after one second.
+     * </summary> 
+     */
     private void PosCorrection()
     {
         StartCoroutine(UpdateCamera());
@@ -217,6 +251,8 @@ public class Wim : MonoBehaviour
         yield return new WaitForSeconds(1.0f);
         GlobalWimDefaultPos.parent.position = Cam.transform.position;
     }
+
+
     // Belowed functions called during Update
 
     private void TrackingRoiPos()
@@ -259,21 +295,23 @@ public class Wim : MonoBehaviour
         List<GameObject> RoiObject = roiSensor.GetDetected();
 
         Vector3 sum = Vector3.zero;
+        int count = 0;
         for(int i = 0; i < RoiObject.Count; i++)
         {
-            if (RoiObject[i].tag == "Arrow") continue;
-            sum += RoiObject[i].transform.position;
+            if (RoiObject[i].layer == LayerMask.NameToLayer("Global Wim"))
+            {
+                sum += RoiObject[i].transform.position;
+                count++;
+            }
         }
 
-        if (RoiObject.Count <= 1)
+        if (RoiObject.Count <= 0)
             return;
 
-        Vector3 centerPosOfRoi = sum / (RoiObject.Count-1);
+        Vector3 centerPosOfRoi = sum / count;
 
         trackingRoiGlobalPosition.transform.position = centerPosOfRoi;
-
         trackingRoiLocalPosition.transform.localPosition = trackingRoiGlobalPosition.transform.localPosition;
-
 
         localWim.transform.position = LocalWimDefaultPos.position + (localWim.transform.position - trackingRoiLocalPosition.transform.position);
     }
