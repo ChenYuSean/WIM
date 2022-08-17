@@ -47,7 +47,6 @@ public class ReplicaGrab : MonoBehaviour
         {
             transform.parent = Arrow.transform;
             grabbed = true;
-            FindObjectOfType<Recorder>().oper_MovingObject += 1;
         }
         if (touched && ((m_controllerPress.GetStateUp(SteamVR_Input_Sources.RightHand) && whichhand) || (m_controllerPress.GetStateUp(SteamVR_Input_Sources.LeftHand) && !whichhand)) && grabbed)
         {
@@ -57,7 +56,6 @@ public class ReplicaGrab : MonoBehaviour
         }
         if (grabbed) 
         {
-            FindObjectOfType<Recorder>().time_MovingObject += Time.deltaTime;
         }
     }
     private void OnTriggerEnter(Collider other)

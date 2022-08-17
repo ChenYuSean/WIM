@@ -47,7 +47,6 @@ public class TranslateByWidget : MonoBehaviour
         }
         if (state.translating)
         {
-            FindObjectOfType<Recorder>().time_6DOF += Time.deltaTime;
             myHighlight.ProfileLoad(SphereGrab);
             myHighlight.highlighted = true;
             mParentsParent.transform.parent = whichhand ? controllerRight.transform : controllerLeft.transform;
@@ -60,7 +59,6 @@ public class TranslateByWidget : MonoBehaviour
             {
                 whichhand = (m_controllerPress.GetStateDown(SteamVR_Input_Sources.RightHand));
                 state.translating = true;
-                FindObjectOfType<Recorder>().oper_6DOF += 1;
             }
         }
         else

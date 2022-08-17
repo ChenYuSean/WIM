@@ -57,7 +57,6 @@ public class RotateAxis : MonoBehaviour
                 whichhand = (m_controllerPress.GetStateDown(SteamVR_Input_Sources.RightHand));
                 state.rotating = true;
                 rotating = true;
-                FindObjectOfType<Recorder>().oper_Rotation += 1;
             }
         }
         if ((m_controllerPress.GetStateUp(SteamVR_Input_Sources.RightHand) && whichhand) || (m_controllerPress.GetStateUp(SteamVR_Input_Sources.LeftHand) && !whichhand))
@@ -70,7 +69,6 @@ public class RotateAxis : MonoBehaviour
         {
             posLastFrameR = posThisFrameR;
             posLastFrameL = posThisFrameL;
-            FindObjectOfType<Recorder>().time_Rotation += Time.deltaTime;
         }
         else
         {

@@ -93,7 +93,6 @@ public class DroneCasting : MonoBehaviour
     public AudioClip FromStep2ToStep1;
     public AudioSource AudioSource;
 
-    public Recorder recorder;
     public Vector3 PosLF;
     public Quaternion QuaternionLF;
 
@@ -144,9 +143,6 @@ public class DroneCasting : MonoBehaviour
         controllerLeft = GetComponent<ControllerManager>().getLeftController();
         controllerRight = GetComponent<ControllerManager>().getRightController();
         trackedObj = controllerRight.GetComponent<SteamVR_Behaviour_Pose>();
-        recorder = gameObject.GetComponent<Recorder>();
-        if (recorder == null)
-            recorder = gameObject.AddComponent<Recorder>();
 
         m_TriggerPress = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("PressTrigger");
         m_ApplicationMenuPress = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("PressApplicationMenu");
@@ -183,12 +179,8 @@ public class DroneCasting : MonoBehaviour
         SetFrontDown();
         getVRInput();
 
-        recorder.journeyLength += Vector3.Distance(Cam.transform.position, PosLF);
         PosLF = Cam.transform.position;
 
-        recorder.swingAngle.x += Mathf.Abs(Cam.transform.rotation.x - QuaternionLF.x);
-        recorder.swingAngle.y += Mathf.Abs(Cam.transform.rotation.y - QuaternionLF.y);
-        recorder.swingAngle.z += Mathf.Abs(Cam.transform.rotation.z - QuaternionLF.z);
         QuaternionLF = Cam.transform.rotation;
 
         FlowControl();
@@ -481,7 +473,6 @@ public class DroneCasting : MonoBehaviour
             {
                 if (!Enlarge)
                 {
-                    recorder.oper_DistanceEnlarging += 1;
                     oriLocalScale = RotationAxis.transform.localScale;
                 }
                 Enlarge = true;
@@ -675,27 +666,7 @@ public class DroneCasting : MonoBehaviour
         if (SelectedObj != null && SelectedObj.CompareTag("Targets"))
         {
             SelectedObj.layer = 9;
-            switch (NowSTEP)
-            {
-                case STEP.dflt:
-                    recorder.successfulSelection_defaultmode += 1;
-                    break;
-                case STEP.One:
-                    recorder.successfulSelection_step1 += 1;
-                    break;
-                case STEP.Two:
-                    recorder.successfulSelection_step2 += 1;
-                    break;
-            }
-            recorder.total_Selections += 1;
-            recorder.successful_selection = true;
-            recorder.FinishSelection();
-        }
-        else
-        {
-            recorder.successful_selection = false;
-            recorder.total_Selections += 1;
-            recorder.FinishSelection();
+
         }
         SelectedObj = null;
     }
@@ -1041,7 +1012,7 @@ public class DroneCasting : MonoBehaviour
     }
 
     // Find the nearest object to the ray
-    GameObject BubbleMechanism(Vector3 origin, Vector3 direction, int layermask, char LorR)
+    GameObject BubbleMechanism(Vector3 origin, Vector3 direction, int layermask, char LorR )
     {
         Collider[] selectableObjects = Physics.OverlapSphere(origin, float.MaxValue, layermask);
         if (selectableObjects.Length == 0)

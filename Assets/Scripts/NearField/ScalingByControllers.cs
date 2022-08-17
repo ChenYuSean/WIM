@@ -53,7 +53,6 @@ public class ScalingByControllers : MonoBehaviour
             //FindObjectOfType<SphereCasting>().recorder.oper_Scaling += 1;
             if (state.scaling == false && state.scaleReady == true)
             {
-                FindObjectOfType<Recorder>().oper_Scaling += 1;
                 state.rotating = false;
                 state.translating = false;
                 state.scaling = true;
@@ -66,7 +65,6 @@ public class ScalingByControllers : MonoBehaviour
             if(state.scaling)
             {
                 transform.localScale = originalScaling * Vector3.Distance(controllerLeft.transform.position, controllerRight.transform.position) / originalDistance;
-                FindObjectOfType<Recorder>().time_Scaling += Time.deltaTime;
             }
         }else
         {
