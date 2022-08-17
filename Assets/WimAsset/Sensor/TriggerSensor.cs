@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using HighlightPlus;
 
 namespace SensorToolkit
 {
@@ -157,6 +158,12 @@ namespace SensorToolkit
                 }
             }
 
+            HighlightEffect highlight = other.GetComponent<HighlightEffect>();
+            if (highlight != null)
+            {
+                highlight.highlighted = true;
+            }
+
             if (OnSensorUpdate != null) OnSensorUpdate();
         }
 
@@ -180,6 +187,12 @@ namespace SensorToolkit
                 }
             }
 
+            HighlightEffect highlight = other.GetComponent<HighlightEffect>();
+            if (highlight != null)
+            {
+                highlight.highlighted = false;
+            }
+
             if (OnSensorUpdate != null) OnSensorUpdate();
         }
 
@@ -194,6 +207,12 @@ namespace SensorToolkit
                     {
                         o.child.SetActive(false);
                     }
+                }
+
+                HighlightEffect highlight = other.GetComponent<HighlightEffect>();
+                if (highlight != null)
+                {
+                    highlight.highlighted = false;
                 }
             }
             isColliderStale.Clear();

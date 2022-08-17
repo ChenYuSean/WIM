@@ -16,22 +16,16 @@ public class Wim : MonoBehaviour
     [SerializeField]
     private Vector3 wimSize = new Vector3(0.005f, 0.005f, 0.005f);
     private GameObject globalWim, localWim, userTransform;
-    private Transform WimCenter; 
     [SerializeField]
     private Transform GlobalWimDefaultPos;
     [SerializeField]
     private Transform LocalWimDefaultPos;
-
-    private Vector3 GlobalPosOffset;
-    private Vector3 LocalPosOffset;
-
 
     private LayerMask globalWimLayer;
     private LayerMask localWimLayer;
 
     private int currentBufferIndex = 0;
     private TriggerSensor roiSensor;
-    private RoiController roiController;
     private GameObject trackingRoiLocalPosition;
     private GameObject trackingRoiGlobalPosition;
 
@@ -64,10 +58,10 @@ public class Wim : MonoBehaviour
         UpdateLocalWimPos();
         UpdateGlobalWimPos();
         UpdateWorldRoi();
-        ToggleVisibility();
+        InputHandler();
     }
 
-    // Belowed functions run during start 
+    // Belowed functions called on Start
 
     void InitEnv()
     {
@@ -78,7 +72,6 @@ public class Wim : MonoBehaviour
         Cam = userTransform.GetComponent<Camera>();
         globalWimLayer = LayerMask.NameToLayer("Global Wim");
         localWimLayer = LayerMask.NameToLayer("Local Wim");
-        WimCenter = GameObject.Find("WimPos").transform;
         worldCenter = world.transform.Find("WimBoundary").GetComponent<BoxCollider>().bounds.center;
         worldRoi = world.transform.Find("ROI").gameObject;
         IM = GetComponent<InputManager>();
@@ -86,7 +79,7 @@ public class Wim : MonoBehaviour
 
     private IEnumerator UpdateCamera()
     {
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(1.0f);
         GlobalWimDefaultPos.parent.position = Cam.transform.position;
     }
 
@@ -102,10 +95,6 @@ public class Wim : MonoBehaviour
         roiSensor.transform.gameObject.SetActive(true);
         roiSensor.enabled = true;
         roiSensor.isROI = true;
-
-        roiController = globalWim.GetComponentInChildren<RoiController>();
-        //roiController.enabled = true;
-        roiController.setUnit((wimSize.x + wimSize.y + wimSize.z)/3 * 30);
 
         globalWim.transform.Find("ROI").GetComponent<RoiGrab>().enabled = true;
 
@@ -226,7 +215,7 @@ public class Wim : MonoBehaviour
         }
     }
 
-    // Belowed fuctions run every update 
+    // Belowed functions called during Update
 
     private void TrackingRoiPos()
     {
@@ -267,20 +256,15 @@ public class Wim : MonoBehaviour
 
         List<GameObject> RoiObject = roiSensor.GetDetected();
 
-        //string s = "";
-        //foreach(var obj in RoiObject)
-        //{
-        //    s += obj.name;
-        //    s += ", ";
-        //}
-        //Debug.Log(s);
-
         Vector3 sum = Vector3.zero;
         for(int i = 0; i < RoiObject.Count; i++)
         {
             if (RoiObject[i].tag == "Arrow") continue;
             sum += RoiObject[i].transform.position;
         }
+
+        if (RoiObject.Count <= 1)
+            return;
 
         Vector3 centerPosOfRoi = sum / (RoiObject.Count-1);
 
@@ -305,18 +289,6 @@ public class Wim : MonoBehaviour
         globalWim.transform.position = GlobalWimDefaultPos.position;
     }
 
-    private void ToggleVisibility()
-    {
-        if(IM.RightHand().Menu.press)
-        {
-            localWim.SetActive(!localWim.activeSelf);
-        }
-
-        if (IM.LeftHand().Menu.press)
-        {
-            globalWim.SetActive(!globalWim.activeSelf);
-        }
-    }
     private void UpdateWorldRoi()
     {
         Vector3 dis = roiSensor.transform.position - globalWimBoundary.position;
@@ -326,16 +298,46 @@ public class Wim : MonoBehaviour
 
     private void UpdateDefaultPos()
     {
+        if((Cam.transform.position - GlobalWimDefaultPos.parent.position).magnitude > 0.35f)
+        {
+            GlobalWimDefaultPos.parent.position = Cam.transform.position;
+        }
+    }
+    
+    // Fuctions of InputHandler (run under Update)
+    private void InputHandler()
+    {
+        //ToggleVisibility();
+        ManualCenterCamera();
     }
 
-    // Belowed function are Private functions
+    private void ToggleVisibility()
+    {
+        if (IM.RightHand().Menu.press)
+        {
+            localWim.SetActive(!localWim.activeSelf);
+        }
+
+        if (IM.LeftHand().Menu.press)
+        {
+            globalWim.SetActive(!globalWim.activeSelf);
+        }
+    }
+    private void ManualCenterCamera()
+    {
+        if(IM.RightHand().Menu.press)
+            GlobalWimDefaultPos.parent.position = Cam.transform.position;
+    }
+
+    // Belowed function are Private 
 
 
-    // Belowed fuctions are Public API
+    // Belowed fuctions are Public
     public void Teleport()
     {
         var pos = worldRoi.transform.position;
-        pos.y = 100;
+        pos.y += 50;
+        if (pos.y < 2) pos.y = 2;
         pos.z += 150;
         transform.position = pos;
     }
