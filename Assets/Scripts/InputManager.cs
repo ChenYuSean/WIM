@@ -34,6 +34,7 @@ public class InputManager : MonoBehaviour
     public struct Touchpad
     {
         public Vector2 axis;
+        public InputKey key;
         // more precise input with the help of axis
         public InputKey left;
         public InputKey right;
@@ -130,6 +131,13 @@ public class InputManager : MonoBehaviour
         left.Touchpad.down.release = left.Touchpad.raw_down.release && left.Touchpad.axis.y < -0.5;
         left.Touchpad.down.hold = left.Touchpad.raw_down.hold && left.Touchpad.axis.y < -0.5;
 
+        left.Touchpad.key.press = left.Touchpad.raw_down.press || left.Touchpad.raw_up.press ||
+                                     left.Touchpad.raw_right.press || left.Touchpad.raw_left.press;
+        left.Touchpad.key.release = left.Touchpad.raw_down.release || left.Touchpad.raw_up.release ||
+                             left.Touchpad.raw_right.release || left.Touchpad.raw_left.release;
+        left.Touchpad.key.hold = left.Touchpad.raw_down.hold || left.Touchpad.raw_up.hold ||
+                             left.Touchpad.raw_right.hold || left.Touchpad.raw_left.hold;
+
     }    
     private void RightHandInput()
     {
@@ -178,5 +186,12 @@ public class InputManager : MonoBehaviour
         right.Touchpad.down.press = right.Touchpad.raw_down.press && right.Touchpad.axis.y < -0.5;
         right.Touchpad.down.release = right.Touchpad.raw_down.release && right.Touchpad.axis.y < -0.5;
         right.Touchpad.down.hold = right.Touchpad.raw_down.hold && right.Touchpad.axis.y < -0.5;
+
+        right.Touchpad.key.press = right.Touchpad.raw_down.press || right.Touchpad.raw_up.press ||
+                             right.Touchpad.raw_right.press || right.Touchpad.raw_left.press;
+        right.Touchpad.key.release = right.Touchpad.raw_down.release || right.Touchpad.raw_up.release ||
+                             right.Touchpad.raw_right.release || right.Touchpad.raw_left.release;
+        right.Touchpad.key.hold = right.Touchpad.raw_down.hold || right.Touchpad.raw_up.hold ||
+                             right.Touchpad.raw_right.hold || right.Touchpad.raw_left.hold;
     }
 }

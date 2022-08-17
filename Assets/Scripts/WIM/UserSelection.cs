@@ -8,6 +8,8 @@ public class UserSelection : MonoBehaviour
     public GameObject leftController;
     public GameObject rightController;
 
+    private InputManager IM;
+
     private GameObject BubbleDiskR;
     private GameObject BubbleDiskL;
 
@@ -15,8 +17,8 @@ public class UserSelection : MonoBehaviour
     private Linedrawer rightRay;
     private bool draw = false;
 
-    private float RayLengthR = 1000;
-    private float RayLengthL = 1000;
+    private float RayLengthR = 1.0f;
+    private float RayLengthL = 1.0f;
     void Start()
     {
         InitEnv();
@@ -34,6 +36,9 @@ public class UserSelection : MonoBehaviour
     {
         BubbleDiskL = leftController.transform.Find("Bubble").gameObject;
         BubbleDiskR = rightController.transform.Find("Bubble").gameObject;
+        BubbleDiskL.SetActive(false);
+        BubbleDiskR.SetActive(false);
+        IM = GetComponent<InputManager>();
     }
     
     private void InitLineDrawer()
@@ -58,10 +63,14 @@ public class UserSelection : MonoBehaviour
 
     private void RayCasting()
     {
-        BubbleMechanism(false, LayerMask.NameToLayer("Local Wim"));
+        int layerMask = 1 << LayerMask.NameToLayer("Local Wim");
+        var selectedObj = BubbleMechanism(false, layerMask);
+        if(IM.LeftHand().Trigger.press && selectedObj != null)
+        {
+            Debug.Log(selectedObj.name + " selected");
+        }
     }
 
-    // Belowed functions are Private
     private void ToggleDraw(bool OnOff)
     {
         if(OnOff)
@@ -98,11 +107,9 @@ public class UserSelection : MonoBehaviour
         Collider[] selectableObjects = Physics.OverlapSphere(origin, float.MaxValue, layermask);
         if (selectableObjects.Length == 0)
         {
-            //Debug.Log("NO overlap");
             return null;
         }
         var nearestObj = selectableObjects[0].gameObject;
-        Debug.Log(nearestObj.name);
 
         int i = 0;
         float mindist = float.MaxValue;
@@ -182,7 +189,8 @@ public class UserSelection : MonoBehaviour
                     //SetHighlight(nearestObj, "Touch", false);
                     nearestObj = null;
                     //BubbleDiskR.transform.position = RayOriginR;
-                    BubbleDiskR.SetActive(false);
+                    BubbleDiskL.SetActive(false);
+
                 }
             }
         }

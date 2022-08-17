@@ -300,7 +300,7 @@ public class Wim : MonoBehaviour
 
     private void UpdateDefaultPos()
     {
-        if((Cam.transform.position - GlobalWimDefaultPos.parent.position).magnitude > 0.35f)
+        if((Cam.transform.position - GlobalWimDefaultPos.parent.position).magnitude > 0.33f)
         {
             GlobalWimDefaultPos.parent.position = Cam.transform.position;
         }
@@ -327,7 +327,7 @@ public class Wim : MonoBehaviour
     }
     private void ManualCenterCamera()
     {
-        if(IM.RightHand().Menu.press)
+        if (IM.RightHand().Touchpad.key.press)
             GlobalWimDefaultPos.parent.position = Cam.transform.position;
     }
 
