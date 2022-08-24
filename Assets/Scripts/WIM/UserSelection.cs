@@ -9,16 +9,30 @@ public class UserSelection : MonoBehaviour
     public GameObject rightController;
 
     private InputManager IM;
-
+    [SerializeField]
+    private Mode Selection = Mode.Ray;
+    enum Mode{Ray,NearField};
+    //
     private GameObject BubbleDiskR;
     private GameObject BubbleDiskL;
 
     private Linedrawer leftRay;
     private Linedrawer rightRay;
-    private bool draw = false;
+    private bool leftDraw = false;
+    private bool rightDraw = false;
 
-    private float RayLengthR = 1.0f;
-    private float RayLengthL = 1.0f;
+    private Vector3 RayOriginR;
+    private Vector3 RayOriginL;
+    private Vector3 RayDirectionR;
+    private Vector3 RayDirectionL;
+    private float RayLengthR = 0.5f;
+    private float RayLengthL = 0.5f;
+    //
+    private ArrowTrigger triggerScriptL;
+    private ArrowTrigger triggerScriptR;
+
+    private GameObject SelectedObj;
+    private GameObject SelectedObjR;
     void Start()
     {
         InitEnv();
@@ -27,8 +41,17 @@ public class UserSelection : MonoBehaviour
 
     void Update()
     {
-        DrawLine();
-        RayCasting();
+        if (Selection == Mode.Ray)
+        {
+            getRay();
+            DrawLine();
+            RayCasting();
+        }
+        else 
+        if(Selection == Mode.NearField)
+        {
+            NearFieldSelection();
+        }
     }
     
     // Belowed functions called on Start
@@ -44,6 +67,13 @@ public class UserSelection : MonoBehaviour
         BubbleDiskL.SetActive(false);
         BubbleDiskR.SetActive(false);
         IM = GetComponent<InputManager>();
+        triggerScriptL = leftController.GetComponentInChildren<ArrowTrigger>();
+        triggerScriptR = rightController.GetComponentInChildren<ArrowTrigger>();
+        if (Selection == Mode.NearField)
+        {
+            triggerScriptL.active = true;
+            triggerScriptR.active = true;
+        }
     }
 
     /**
@@ -55,11 +85,30 @@ public class UserSelection : MonoBehaviour
     {
         leftRay = new Linedrawer();
         rightRay = new Linedrawer();
-        draw = true;
+        if (Selection == Mode.Ray)
+        {
+            leftDraw = true;
+            rightDraw = false;
+        }
+        else
+        if (Selection == Mode.NearField)
+        {
+            leftDraw = false;
+            rightDraw = false;
+        }
     }
 
 
     // Belowed functions called during Update
+    private void getRay()
+    {
+        RayOriginR = rightController.transform.position;
+        RayOriginL = leftController.transform.position;
+        RayDirectionR = rightController.transform.forward;
+        RayDirectionL = leftController.transform.forward;
+    }
+
+
     /**
      * <summary>
      * Draw the ray in Scene
@@ -67,12 +116,15 @@ public class UserSelection : MonoBehaviour
      */
     private void DrawLine()
     {
-        if(draw)
+        if(leftDraw)
         {
-            var left_end = leftController.transform.position + leftController.transform.forward * RayLengthL;
-            var right_end = rightController.transform.position + rightController.transform.forward * RayLengthR;
+            var left_end = RayOriginL + RayDirectionL * RayLengthL;
             leftRay.DrawLineInGameView(leftController.transform.position,left_end,Color.red);
-            //rightRay.DrawLineInGameView(rightController.transform.position,right_end,Color.red);
+        }
+        if(rightDraw)
+        {
+            var right_end = RayOriginR + RayDirectionR * RayLengthR;
+            rightRay.DrawLineInGameView(rightController.transform.position,right_end,Color.red);
         }
     }
 
@@ -83,28 +135,59 @@ public class UserSelection : MonoBehaviour
      */
     private void RayCasting()
     {
+        var preSelected = SelectedObj;
         int layerMask = 1 << LayerMask.NameToLayer("Local Wim");
-        var selectedObj = BubbleMechanism(false, layerMask);
-        if(IM.LeftHand().Trigger.press && selectedObj != null)
+        RaycastHit lhit;
+        if(Physics.Raycast(RayOriginL,RayDirectionL,out lhit,RayLengthL,layerMask))
         {
-            Debug.Log(selectedObj.name + " selected");
+            BubbleDiskL.SetActive(false);
+            BubbleDiskR.SetActive(false);
+            SelectedObj = lhit.collider.gameObject;
+            SetHighlight(SelectedObj, "Touch", true);
+        }
+        else
+        {
+            SelectedObj = BubbleMechanism(false, layerMask);
+        }
+
+        if (preSelected != SelectedObj)
+            SetHighlight(preSelected, "Touch", false);
+
+        if(IM.LeftHand().Trigger.press && SelectedObj != null)
+        {
+            SetHighlight(SelectedObj, "Grab", true);
+            SetHighlight(SelectedObj.GetComponent<ObjectParentChildInfo>().world, "Grab", true);
         }
     }
     /**
      *<summary>
      * Turn on or off the line drawer. Also clear the line in scene when turn off.
      */
-    private void ToggleDraw(bool OnOff)
+    private void ToggleDraw(bool isRight,bool OnOff)
     {
-        if(OnOff)
+        if (isRight)
         {
-            draw = true;
+            if (OnOff)
+            {
+                rightDraw = true;
+            }
+            else
+            {
+                rightDraw = false;
+                rightRay.DrawLineInGameView(RayOriginR, RayOriginR, Color.red);
+            }
         }
         else
         {
-            draw = false;
-            leftRay.DrawLineInGameView(leftController.transform.position, leftController.transform.position, Color.red);
-            rightRay.DrawLineInGameView(rightController.transform.position, rightController.transform.position, Color.red);
+            if (OnOff)
+            {
+                leftDraw = true;
+            }
+            else
+            {
+                leftDraw = false;
+                leftRay.DrawLineInGameView(RayOriginL, RayOriginL, Color.red);
+            }
         }
     }
 
@@ -119,11 +202,6 @@ public class UserSelection : MonoBehaviour
     GameObject BubbleMechanism(bool isRight,int layermask)
     {
         float bubbleSize = 0.01f ;
-        Vector3 RayOriginR = rightController.transform.position;
-        Vector3 RayOriginL = leftController.transform.position;
-        Vector3 RayDirectionR = rightController.transform.forward;
-        Vector3 RayDirectionL = leftController.transform.forward;
-
 
         Vector3 origin = isRight ? RayOriginR : RayOriginL;
         Vector3 direction = isRight ? RayDirectionR : RayDirectionL;
@@ -178,13 +256,13 @@ public class UserSelection : MonoBehaviour
                     BubbleDiskR.transform.localScale = new Vector3(bubbleSize + 0.01f, bubbleSize + 0.01f, 0.01f);
                     BubbleDiskR.transform.LookAt(RayOriginR);
 
+                    SetHighlight(nearestObj, "Touch", true);
                     BubbleDiskR.SetActive(true);
                 }
                 else
                 {
-                    //SetHighlight(nearestObj, "Touch", false);
+                    SetHighlight(nearestObj, "Touch", false);
                     nearestObj = null;
-                    //BubbleDiskR.transform.position = RayOriginR;
                     BubbleDiskR.SetActive(false);
                 }
             }
@@ -206,13 +284,13 @@ public class UserSelection : MonoBehaviour
                     BubbleDiskL.transform.localScale = new Vector3(bubbleSize + 0.01f, bubbleSize + 0.01f, 0.01f);
                     BubbleDiskL.transform.LookAt(RayOriginL);
 
+                    SetHighlight(nearestObj, "Touch", true);
                     BubbleDiskL.SetActive(true);
                 }
                 else
                 {
-                    //SetHighlight(nearestObj, "Touch", false);
+                    SetHighlight(nearestObj, "Touch", false);
                     nearestObj = null;
-                    //BubbleDiskR.transform.position = RayOriginR;
                     BubbleDiskL.SetActive(false);
 
                 }
@@ -243,5 +321,46 @@ public class UserSelection : MonoBehaviour
         return trueDis;
     }
 
+    private void NearFieldSelection()
+    {
+        // Left
+        var preSelected = SelectedObj;
+        SelectedObj = triggerScriptL.getCollidingObject();
+
+        SetHighlight(SelectedObj, "Touch", true);
+        if (preSelected != SelectedObj)
+            SetHighlight(preSelected, "Touch", false);
+
+        if (IM.LeftHand().Trigger.press && SelectedObj != null)
+        {
+            SetHighlight(SelectedObj, "Grab", true);
+            SetHighlight(SelectedObj.GetComponent<ObjectParentChildInfo>().world, "Grab", true);
+        }
+        // Right
+        preSelected = SelectedObjR;
+        SelectedObjR = triggerScriptR.getCollidingObject();
+
+        SetHighlight(SelectedObjR, "Touch", true);
+        if (preSelected != SelectedObjR)
+            SetHighlight(preSelected, "Touch", false);
+
+        if (IM.RightHand().Trigger.press && SelectedObjR != null)
+        {
+            SetHighlight(SelectedObjR, "Grab", true);
+            SetHighlight(SelectedObjR.GetComponent<ObjectParentChildInfo>().world, "Grab", true);
+        }
+    }
+
+    private void SetHighlight(GameObject obj, string type, bool OnOff)
+    {
+        if (obj != null)
+        {
+            var script = obj.GetComponent<SpecialEffectManager>();
+            if (script != null)
+            {
+                script.Highlight(type, OnOff);
+            }
+        }
+    }
     // Belowed functions are Public
 }

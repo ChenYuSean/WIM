@@ -10,13 +10,25 @@ public class SpecialEffectManager : MonoBehaviour
     public int typeOfHighlight = 0;
 
     private AudioSource myAudioSource;
-    public AudioClip[] mAudioClips;
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField]
+    private AudioClip[] mAudioClips;
+    private bool NoSound = false;
+    void Awake()
     {
         highlightEffect = GetComponent<HighlightEffect>();
-        myAudioSource = GetComponent<AudioSource>();
     }
+    private void Start()
+    {
+        myAudioSource = GetComponent<AudioSource>();
+        if (myAudioSource != null)
+        {
+            myAudioSource.playOnAwake = false;
+            mAudioClips = ProjectManager.Instance.getAudioClips();
+        }
+        else
+            NoSound = true;
+    }
+
     private void Update()
     {
         highlightEffect.seeThrough = SeeThroughMode.Never;
@@ -87,7 +99,7 @@ public class SpecialEffectManager : MonoBehaviour
                     highlightEffect.highlighted = true;
                     break;
                 case "Grab":
-                    if(typeOfHighlight != 2)
+                    if(typeOfHighlight != 2 && !NoSound)
                     {
                         myAudioSource.clip = mAudioClips[1];
                         myAudioSource.Play();
@@ -130,13 +142,6 @@ public class SpecialEffectManager : MonoBehaviour
                 typeOfHighlight = 0;
                 highlightEffect.highlighted = false;
             }
-        }
-    }
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.tag == "Arrow")
-        {
-            Highlight("Touch", true);
         }
     }
 }

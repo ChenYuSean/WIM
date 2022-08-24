@@ -6,4 +6,5 @@ public class ObjectParentChildInfo : MonoBehaviour
 {
     public GameObject parent;
     public GameObject child;
+    public GameObject world;
 }
