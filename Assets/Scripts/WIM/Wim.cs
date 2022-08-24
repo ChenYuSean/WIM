@@ -29,7 +29,7 @@ public class Wim : MonoBehaviour
     private TriggerSensor roiSensor;
     private GameObject trackingRoiLocalPosition;
     private GameObject trackingRoiGlobalPosition;
-
+    private GameObject userPosOnWim;
 
     private Transform globalWimBoundary;
     private Transform roiBoundary;
@@ -39,7 +39,10 @@ public class Wim : MonoBehaviour
 
     public GameObject LocalAxis;
 
-    // Start is called before the first frame update
+    void Awake()
+    {
+
+    }
     void Start()
     {
         InitEnv();
@@ -50,7 +53,6 @@ public class Wim : MonoBehaviour
         PosCorrection();
     }
 
-    // Update is called once per frame
     void Update()
     {
         TrackingRoiPos();
@@ -110,7 +112,7 @@ public class Wim : MonoBehaviour
         localWim.transform.localScale = wimSize;
         localWim.transform.position = LocalWimDefaultPos.position;
         SetWimObjLayer(localWim, localWimLayer);
-        SetWimScript(localWim);
+        SetWimAudio(localWim);
         localWim.transform.Find("ROI").gameObject.SetActive(false);
         
         LocalAxis.transform.position = LocalWimDefaultPos.position;
@@ -134,6 +136,12 @@ public class Wim : MonoBehaviour
         trackingRoiGlobalPosition = new GameObject("Tracking Roi Local Position");
         trackingRoiGlobalPosition.transform.parent = globalWim.transform;
 
+        userPosOnWim = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        userPosOnWim.name = "User Position";
+        var rend = userPosOnWim.GetComponent<Renderer>();
+        rend.material.color = Color.red;
+        userPosOnWim.transform.localScale = wimSize*5;
+        userPosOnWim.transform.parent = globalWim.transform;
     }
 
     /**
@@ -160,17 +168,16 @@ public class Wim : MonoBehaviour
         }
     }
 
-    void SetWimScript(GameObject obj)
+    void SetWimAudio(GameObject obj)
     {
         if (null == obj)
         {
             return;
         };
 
-        if (obj.GetComponent<HighlightPlus.HighlightEffect>() != null)
+        if (obj.GetComponent<SpecialEffectManager>() != null)
         {
             obj.AddComponent<AudioSource>();
-            obj.AddComponent<SpecialEffectManager>();
         }
 
         foreach (Transform child in obj.transform)
@@ -179,7 +186,7 @@ public class Wim : MonoBehaviour
             {
                 continue;
             }
-            SetWimScript(child.gameObject);
+            SetWimAudio(child.gameObject);
         }
     }
     /**
@@ -445,5 +452,9 @@ public class Wim : MonoBehaviour
         if (pos.y < 2) pos.y = 2;
         pos.z += 150;
         transform.position = pos;
+        // User position on wim
+        var dis = pos - worldCenter;
+        dis *= wimSize.x;
+        userPosOnWim.transform.position = globalWimBoundary.position + dis;
     }
 }
