@@ -286,5 +286,10 @@ namespace SensorToolkit
             }
             return false;
         }
+
+        private void OnDestroy()
+        {
+            removeAllCollider();
+        }
     }
 }

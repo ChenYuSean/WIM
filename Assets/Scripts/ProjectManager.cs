@@ -7,17 +7,27 @@ public class ProjectManager : MonoBehaviour
     public static ProjectManager Instance;
     [SerializeField]
     private AudioClip[] SFX;
+    [SerializeField]
+    private GameObject CameraRig;
     void Awake()
     {
         if (Instance == null)
             Instance = this;
         else if (Instance != this)
+        {
             Destroy(gameObject);
-        DontDestroyOnLoad(this.gameObject);
+            return;
+        }
+        DontDestroyOnLoad(Instance);
     }
 
     public AudioClip[] getAudioClips()
     {
         return SFX;
+    }
+
+    public GameObject getCameraRig()
+    {
+        return CameraRig;
     }
 }

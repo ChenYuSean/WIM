@@ -6,10 +6,6 @@ TagManager:
   tags:
   - Floor
   - Arrow
-  - RayEndPoint
-  - Targets
-  - projectile
-  - FxTemporaire
   layers:
   - Default
   - TransparentFX

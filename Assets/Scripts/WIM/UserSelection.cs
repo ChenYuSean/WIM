@@ -9,10 +9,7 @@ public class UserSelection : MonoBehaviour
     public GameObject rightController;
 
     private InputManager IM;
-    [SerializeField]
-    private Mode Selection = Mode.Ray;
-    enum Mode{Ray,NearField};
-    //
+
     private GameObject BubbleDiskR;
     private GameObject BubbleDiskL;
 
@@ -25,8 +22,10 @@ public class UserSelection : MonoBehaviour
     private Vector3 RayOriginL;
     private Vector3 RayDirectionR;
     private Vector3 RayDirectionL;
-    private float RayLengthR = 0.5f;
-    private float RayLengthL = 0.5f;
+    [SerializeField]
+    private float RayLengthR = 15.0f;
+    [SerializeField]
+    private float RayLengthL = 15.0f;
     //
     private ArrowTrigger triggerScriptL;
     private ArrowTrigger triggerScriptR;
@@ -41,19 +40,27 @@ public class UserSelection : MonoBehaviour
 
     void Update()
     {
-        if (Selection == Mode.Ray)
-        {
-            getRay();
-            DrawLine();
-            RayCasting();
-        }
-        else 
-        if(Selection == Mode.NearField)
-        {
-            NearFieldSelection();
-        }
+        getRay();
+        DrawLine();
+        RayCasting();
+
+        NearFieldSelection();
     }
-    
+
+    private void OnEnable()
+    {
+        ArrowTrigger handCollider = leftController.transform.GetComponentInChildren<ArrowTrigger>();
+        handCollider.EnterWim += OnEnteringWim;
+        handCollider.LeaveWim += OnLeavingWim;
+    }
+
+    private void OnDisable()
+    {
+        ArrowTrigger handCollider = leftController.transform.GetComponentInChildren<ArrowTrigger>();
+        handCollider.EnterWim -= OnEnteringWim;
+        handCollider.LeaveWim -= OnLeavingWim;
+    }
+
     // Belowed functions called on Start
     /**
      * <summary>
@@ -69,11 +76,8 @@ public class UserSelection : MonoBehaviour
         IM = GetComponent<InputManager>();
         triggerScriptL = leftController.GetComponentInChildren<ArrowTrigger>();
         triggerScriptR = rightController.GetComponentInChildren<ArrowTrigger>();
-        if (Selection == Mode.NearField)
-        {
-            triggerScriptL.active = true;
-            triggerScriptR.active = true;
-        }
+        triggerScriptL.active = true;
+        triggerScriptR.active = true;
     }
 
     /**
@@ -85,17 +89,8 @@ public class UserSelection : MonoBehaviour
     {
         leftRay = new Linedrawer();
         rightRay = new Linedrawer();
-        if (Selection == Mode.Ray)
-        {
-            leftDraw = true;
-            rightDraw = false;
-        }
-        else
-        if (Selection == Mode.NearField)
-        {
-            leftDraw = false;
-            rightDraw = false;
-        }
+        leftDraw = true;
+        rightDraw = false;
     }
 
 
@@ -136,27 +131,30 @@ public class UserSelection : MonoBehaviour
     private void RayCasting()
     {
         var preSelected = SelectedObj;
-        int layerMask = 1 << LayerMask.NameToLayer("Local Wim");
-        RaycastHit lhit;
-        if(Physics.Raycast(RayOriginL,RayDirectionL,out lhit,RayLengthL,layerMask))
+        int layerMask = 1 << LayerMask.NameToLayer("Background");
+        if (leftDraw)
         {
-            BubbleDiskL.SetActive(false);
-            BubbleDiskR.SetActive(false);
-            SelectedObj = lhit.collider.gameObject;
-            SetHighlight(SelectedObj, "Touch", true);
-        }
-        else
-        {
-            SelectedObj = BubbleMechanism(false, layerMask);
-        }
+            RaycastHit lhit;
+            if (Physics.Raycast(RayOriginL, RayDirectionL, out lhit, RayLengthL, layerMask))
+            {
+                BubbleDiskL.SetActive(false);
+                BubbleDiskR.SetActive(false);
+                SelectedObj = lhit.collider.gameObject;
+                SetHighlight(SelectedObj, "Touch", true);
+            }
+            else
+            {
+                SelectedObj = BubbleMechanism(false, layerMask);
+            }
 
-        if (preSelected != SelectedObj)
-            SetHighlight(preSelected, "Touch", false);
+            if (preSelected != SelectedObj)
+                SetHighlight(preSelected, "Touch", false);
 
-        if(IM.LeftHand().Trigger.press && SelectedObj != null)
-        {
-            SetHighlight(SelectedObj, "Grab", true);
-            SetHighlight(SelectedObj.GetComponent<ObjectParentChildInfo>().world, "Grab", true);
+            if (IM.LeftHand().Trigger.press && SelectedObj != null)
+            {
+                SetHighlight(SelectedObj, "Grab", true);
+                SetHighlight(SelectedObj.GetComponent<ObjectParentChildInfo>().child, "Grab", true);
+            }
         }
     }
     /**
@@ -361,6 +359,16 @@ public class UserSelection : MonoBehaviour
                 script.Highlight(type, OnOff);
             }
         }
+    }
+
+    private void OnEnteringWim()
+    {
+        ToggleDraw(false, false);
+    }
+
+    private void OnLeavingWim()
+    {
+        ToggleDraw(false, true);
     }
     // Belowed functions are Public
 }

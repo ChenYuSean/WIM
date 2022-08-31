@@ -29,7 +29,7 @@ public class RoiGrab : MonoBehaviour
         wim = GameObject.Find("[CameraRig]").GetComponent<Wim>();
         WimBoundary = transform.parent.Find("WimBoundary").gameObject;
         RoiBound = transform.Find("RoiCollider").gameObject;
-        BoundSize = WimBoundary.transform.lossyScale;
+        BoundSize = WimBoundary.transform.lossyScale/2;
         //Debug.Log(BoundSize);
     }
 

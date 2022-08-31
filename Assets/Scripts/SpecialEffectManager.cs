@@ -10,23 +10,15 @@ public class SpecialEffectManager : MonoBehaviour
     public int typeOfHighlight = 0;
 
     private AudioSource myAudioSource;
-    [SerializeField]
     private AudioClip[] mAudioClips;
-    private bool NoSound = false;
     void Awake()
     {
         highlightEffect = GetComponent<HighlightEffect>();
     }
     private void Start()
     {
-        myAudioSource = GetComponent<AudioSource>();
-        if (myAudioSource != null)
-        {
-            myAudioSource.playOnAwake = false;
-            mAudioClips = ProjectManager.Instance.getAudioClips();
-        }
-        else
-            NoSound = true;
+        myAudioSource = ProjectManager.Instance.getCameraRig().GetComponentInChildren<AudioSource>();
+        mAudioClips = ProjectManager.Instance.getAudioClips();
     }
 
     private void Update()
@@ -99,11 +91,13 @@ public class SpecialEffectManager : MonoBehaviour
                     highlightEffect.highlighted = true;
                     break;
                 case "Grab":
-                    if(typeOfHighlight != 2 && !NoSound)
+                    if (mAudioClips != null)
                     {
                         myAudioSource.clip = mAudioClips[1];
                         myAudioSource.Play();
                     }
+                    else
+                        Debug.Log("Can't Find Audio Clip");
                     typeOfHighlight = 2;
                     highlightEffect.highlighted = false;
                     if (objColor == Color.black)
