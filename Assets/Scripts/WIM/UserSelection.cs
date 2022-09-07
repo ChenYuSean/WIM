@@ -50,6 +50,7 @@ public class UserSelection : MonoBehaviour
 
     private void OnEnable()
     {
+        // adding listener to broadcast
         ArrowTrigger handCollider;
         handCollider = leftController.transform.GetComponentInChildren<ArrowTrigger>();
         handCollider.EnterWim += OnEnteringWim;
@@ -60,19 +61,20 @@ public class UserSelection : MonoBehaviour
         handCollider.LeaveWim += OnLeavingWim;
 
         Teleportation tpScript = ProjectManager.Instance.getCameraRig().GetComponentInChildren<Teleportation>();
-        tpScript.inTeleport += OnTpMode;
-        tpScript.outTeleport += OnLeavingTpMode;
+        tpScript.inTeleport += OnTpModeEnter;
+        tpScript.outTeleport += OnTpModeExit;
     }
 
     private void OnDisable()
     {
+        // remove listener from broadcast
         triggerScriptL.EnterWim -= OnEnteringWim;
         triggerScriptL.LeaveWim -= OnLeavingWim;
         triggerScriptR.EnterWim -= OnEnteringWim;
         triggerScriptR.LeaveWim -= OnLeavingWim;
         Teleportation tpScript = ProjectManager.Instance.getCameraRig().GetComponentInChildren<Teleportation>();
-        tpScript.inTeleport -= OnTpMode;
-        tpScript.outTeleport -= OnLeavingTpMode;
+        tpScript.inTeleport -= OnTpModeEnter;
+        tpScript.outTeleport -= OnTpModeExit;
     }
 
     // Belowed functions called on Start
@@ -155,34 +157,32 @@ public class UserSelection : MonoBehaviour
         if (Controller.Hand == "Right")
             isRight = true;
         var preSelected = SelectedObj;
+
         if (isDraw)
         {
             RaycastHit hit;
             if (Physics.Raycast(RayOrigin, RayDirection, out hit, RayLength, layerMask))
-            {
+            {   // get the raycast target if there's one
                 if (BubbleDiskL.activeSelf) BubbleDiskL.SetActive(false);
                 if (BubbleDiskR.activeSelf) BubbleDiskR.SetActive(false);
                 SelectedObj = hit.collider.gameObject;
                 SetHighlight(SelectedObj, "Touch", true);
             }
             else
-            {
+            {   // or else use BubbleMechanism
                 SelectedObj = BubbleMechanism(isRight, layerMask);
             }
-
-            if (preSelected != SelectedObj)
-                SetHighlight(preSelected, "Touch", false);
-
+            // Select Action(Trigger press)
             if (Controller.Trigger.press && SelectedObj != null)
             {
                 SetHighlight(SelectedObj, "Grab", true);
                 SetHighlight(SelectedObj.GetComponent<ObjectParentChildInfo>().child, "Grab", true);
             }
         }
-        else
-        {
+
+        // Dehighlighted the previous selected object
+        if (preSelected != SelectedObj)
             SetHighlight(preSelected, "Touch", false);
-        }
     }
     /**
      * <summary>
@@ -359,28 +359,37 @@ public class UserSelection : MonoBehaviour
         // Left
         var preSelected = SelectedObj;
         SelectedObj = triggerScriptL.getCollidingObject();
-
-        SetHighlight(SelectedObj, "Touch", true);
+        // Dehighlighted the previous selected object
         if (preSelected != SelectedObj)
             SetHighlight(preSelected, "Touch", false);
-
-        if (IM.LeftHand().Trigger.press && SelectedObj != null)
+        if (SelectedObj != null && SelectedObj.CompareTag("Selectable")) //enter when object is selectable
         {
-            SetHighlight(SelectedObj, "Grab", true);
-            SetHighlight(SelectedObj.GetComponent<ObjectParentChildInfo>().world, "Grab", true);
+            // highlight object when arrow touch it
+            SetHighlight(SelectedObj, "Touch", true);
+            // Select Action(trigger press)
+            if (IM.LeftHand().Trigger.press && SelectedObj != null)
+            {
+                SetHighlight(SelectedObj, "Grab", true);
+                SetHighlight(SelectedObj.GetComponent<ObjectParentChildInfo>().world, "Grab", true);
+            }
         }
         // Right
         preSelected = SelectedObjR;
         SelectedObjR = triggerScriptR.getCollidingObject();
-
-        SetHighlight(SelectedObjR, "Touch", true);
+        // Dehighlighted the previous selected object
         if (preSelected != SelectedObjR)
             SetHighlight(preSelected, "Touch", false);
 
-        if (IM.RightHand().Trigger.press && SelectedObjR != null)
+        if (SelectedObjR != null && SelectedObjR.CompareTag("Selectable")) //enter when object is selectable
         {
-            SetHighlight(SelectedObjR, "Grab", true);
-            SetHighlight(SelectedObjR.GetComponent<ObjectParentChildInfo>().world, "Grab", true);
+            // highlight object when arrow touch it
+            SetHighlight(SelectedObjR, "Touch", true);
+            // Select Action(trigger press)
+            if (IM.RightHand().Trigger.press && SelectedObjR != null)
+            {
+                SetHighlight(SelectedObjR, "Grab", true);
+                SetHighlight(SelectedObjR.GetComponent<ObjectParentChildInfo>().world, "Grab", true);
+            }
         }
     }
 
@@ -423,13 +432,13 @@ public class UserSelection : MonoBehaviour
                 drawLock = 1;
         }
     }
-    private void OnTpMode()
+    private void OnTpModeEnter()
     {
         ToggleDraw(true, false);
         drawLock--;
     }
 
-    private void OnLeavingTpMode()
+    private void OnTpModeExit()
     {
         if (drawLock == 0)
             ToggleDraw(true, true);

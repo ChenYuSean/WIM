@@ -83,39 +83,40 @@ public class Teleportation : MonoBehaviour
         }
     }
 
-    //private void LocalWimTeleport()
-    //{
-    //    if(triggerScript.getCollidingObject() != null)
-    //    {
-    //        wim.MoveUserOnLocalWim(triggerScript.getCollidingPoint());
-    //    }
-    //}
+    private void LocalWimTeleport()
+    {
+        if (triggerScript.getCollidingObject() != null)
+        {
+            wim.MoveUserOnLocalWim(triggerScript.getCollidingPoint());
+        }
+    }
 
     private void InputHandler()
     {
         if(IM.RightHand().Touchpad.axis.magnitude != 0 && draw == false)
-        {   // draw the arc if user touches the touchpad
+        {   // Draw the arc if user touches the touchpad
             draw = true;
             tpArc.Show();
             tpPoint.SetActive(true);
-            inTeleport();
+            inTeleport?.Invoke();
         }
         else 
         if(IM.RightHand().Touchpad.axis.magnitude == 0 && draw == true)
         {
-            // clear the arc if user leaves
+            // Clear the arc if user leaves
             draw = false;
             tpArc.Hide();
             tpPoint.SetActive(false);
-            outTeleport();
+            outTeleport?.Invoke();
         }
 
+        // Teleport Action(Touchpad press)
         if(IM.RightHand().Touchpad.key.press && draw)
         {
             user.transform.position = tpPoint.transform.position;
         }
 
-        //if(IM.RightHand().Trigger.press)
+        //if (IM.RightHand().Trigger.press)
         //{
         //    LocalWimTeleport();
         //}

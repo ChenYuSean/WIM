@@ -12,20 +12,25 @@ public class ArrowTrigger : MonoBehaviour
     public triggerCall LeaveWim;
 
     private Vector3 ArrowTip;
-
+    private int layerMask;
     private void Awake()
     {
         ArrowTip = transform.Find("point").GetComponent<Transform>().position;
+        layerMask = 1 << LayerMask.NameToLayer("Local Wim");
     }
     private void OnTriggerEnter(Collider other)
     {
         hit = null;
         if (!active)
             return;
-        if (other.gameObject.layer == LayerMask.NameToLayer("Local Wim") && other.CompareTag("Selectable"))
+        if (other.gameObject.layer == LayerMask.NameToLayer("Local Wim"))// && other.CompareTag("Selectable"))
         {
             hit = other.gameObject;
-            point = other.ClosestPoint(ArrowTip);
+
+            var ArrowDir = gameObject.transform.up;
+            RaycastHit hitInfo;
+            Physics.Raycast(transform.position - 10 * ArrowDir,ArrowDir,out hitInfo,(15 * ArrowDir).magnitude,layerMask);
+            point = hitInfo.point;
         }
             
         if (WimCheck(other))

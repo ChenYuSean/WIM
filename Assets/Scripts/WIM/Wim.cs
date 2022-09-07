@@ -144,8 +144,14 @@ public class Wim : MonoBehaviour
         trackingRoiGlobalPosition.transform.parent = globalWim.transform;
     }
 
+    /**
+     * <summary>
+     * Create a red ball indicate the user on Wim
+     * </summary>
+     */
     private void InitUserTracking()
     {
+        // global
         userPosOnWim = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         userPosOnWim.name = "User Position";
         var rend = userPosOnWim.GetComponent<Renderer>();
@@ -154,7 +160,7 @@ public class Wim : MonoBehaviour
         userPosOnWim.transform.parent = globalWim.transform;
         userPosOnWim.AddComponent<ObjectParentChildInfo>();
         SetWimObjLayer(userPosOnWim, globalWimLayer);
-
+        // local
         userPosOnLocalWim = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         userPosOnLocalWim.name = "User Position";
         rend = userPosOnLocalWim.GetComponent<Renderer>();
@@ -308,7 +314,7 @@ public class Wim : MonoBehaviour
         objectInLocalWim.GetComponent<ObjectParentChildInfo>().world = objectInWorld;
         objectInLocalWim.GetComponent<ObjectParentChildInfo>().parent = objectInGlobalWim;
         currentBufferIndex++;
-
+           
         foreach (Transform child in objectInLocalWim.transform)
         {
             if (null == child)
@@ -351,8 +357,11 @@ public class Wim : MonoBehaviour
     {
         if (trackingRoiLocalPosition != null)
         {
-            //trackingRoiLocalPosition.transform.localPosition = roiSensor.transform.localPosition;
-            
+            /* old method
+            trackingRoiLocalPosition.transform.localPosition = roiSensor.transform.localPosition;
+            */
+            // Caculate the center of the object in the ROI
+            // using center as localRoi position could prevent unnecessary movement 
             List<GameObject> RoiObject = roiSensor.GetDetected();
             Vector3 sum = Vector3.zero;
             int count = 0;
@@ -364,15 +373,17 @@ public class Wim : MonoBehaviour
                     count++;
                 }
             }
-
             if (count <= 0)
                 return;
-
             Vector3 centerPosOfRoi = sum / count;
 
+            // Set the dummy(trackingRoiGlobalPosition) position to centerPosOfRoi
+            // then get the dummy localPosition under global Wim
+            // Since localRoi and globalRoi has same local position under each WIM
+            // assign localRoi with globalRoi local position would get the true position
             trackingRoiGlobalPosition.transform.position = centerPosOfRoi;
             trackingRoiLocalPosition.transform.localPosition = trackingRoiGlobalPosition.transform.localPosition;
-
+            // local Roi are used in checking the controller is in the Local WIM
             localRoi.transform.position = trackingRoiLocalPosition.transform.position;
         }
     }
@@ -440,12 +451,12 @@ public class Wim : MonoBehaviour
         userPosOnLocalWim.transform.localPosition = userPosOnWim.transform.localPosition;
     }
     // Belowed fuctions are Public
-    //public void MoveUserOnLocalWim(Vector3 destination)
-    //{
-    //    userPosOnLocalWim.transform.position = destination;
-    //    userPosOnWim.transform.localPosition = userPosOnLocalWim.transform.localPosition;
-    //    var dis = userPosOnWim.transform.position - globalWimBoundary.position;
-    //    dis /= wimSize.x;
-    //    transform.position = worldCenter + dis;
-    //}
+    public void MoveUserOnLocalWim(Vector3 destination)
+    {
+        userPosOnLocalWim.transform.position = destination;
+        userPosOnWim.transform.localPosition = userPosOnLocalWim.transform.localPosition;
+        var dis = userPosOnWim.transform.position - globalWimBoundary.position;
+        dis /= wimSize.x;
+        transform.position = worldCenter + dis;
+    }
 }
