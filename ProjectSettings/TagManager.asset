@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Floor
   - Arrow
+  - Selectable
   layers:
   - Default
   - TransparentFX
@@ -18,9 +19,9 @@ TagManager:
   - CollisionDetect
   - UnchangeableObjects
   - Background
-  - Global Wim
+  - SelectableBackground
   - Local Wim
-  - 
+  - Global Wim
   - 
   - 
   - 

@@ -5,43 +5,57 @@ using UnityEngine;
 public class ArrowTrigger : MonoBehaviour
 {
     GameObject hit;
+    Vector3 point;
     public bool active = false;
-    public delegate void triggerCall();
+    public delegate void triggerCall(GameObject Controller);
     public triggerCall EnterWim;
     public triggerCall LeaveWim;
+
+    private Vector3 ArrowTip;
+
+    private void Awake()
+    {
+        ArrowTip = transform.Find("point").GetComponent<Transform>().position;
+    }
     private void OnTriggerEnter(Collider other)
     {
+        hit = null;
         if (!active)
             return;
-        if (other.gameObject.layer == LayerMask.NameToLayer("Local Wim"))
+        if (other.gameObject.layer == LayerMask.NameToLayer("Local Wim") && other.CompareTag("Selectable"))
         {
             hit = other.gameObject;
+            point = other.ClosestPoint(ArrowTip);
         }
-        else
-            hit = null;
+            
         if (WimCheck(other))
         {
-            EnterWim?.Invoke();
+            EnterWim?.Invoke(this.transform.parent.gameObject);
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
+        hit = null;
+        point = Vector3.zero;
         if (!active)
             return;
 
         SetHighlight(hit, "Touch", false);
-        hit = null;
-
         if (WimCheck(other))
         {
-            LeaveWim?.Invoke();
+            LeaveWim?.Invoke(this.transform.parent.gameObject);
         }
     }
 
     public GameObject getCollidingObject()
     {
         return hit;
+    }
+
+    public Vector3 getCollidingPoint()
+    {
+        return point;
     }
 
     private bool WimCheck(Collider other)

@@ -24,7 +24,7 @@ public class SpecialEffectManager : MonoBehaviour
     private void Update()
     {
         highlightEffect.seeThrough = SeeThroughMode.Never;
-        if (this.gameObject.layer == LayerMask.NameToLayer("NearFieldObjects") && typeOfHighlight != 2)
+        if (this.gameObject.layer == LayerMask.NameToLayer("LocalWim") && typeOfHighlight != 2)
         {
             var objColor = GetComponent<MeshRenderer>().materials[0].color;
             highlightEffect.highlighted = false;
@@ -61,7 +61,7 @@ public class SpecialEffectManager : MonoBehaviour
                 case "Touch":
                     if (typeOfHighlight != 0 || typeOfHighlight == 2)
                         return;
-                    if (this.gameObject.layer == LayerMask.NameToLayer("NearFieldObjects"))
+                    if (this.gameObject.layer == LayerMask.NameToLayer("LocalWim"))
                     {
                         highlightEffect.HitFX(Color.white, 1.0f);
                     }                    
@@ -97,7 +97,7 @@ public class SpecialEffectManager : MonoBehaviour
                         myAudioSource.Play();
                     }
                     else
-                        Debug.Log("Can't Find Audio Clip");
+                        Debug.LogError("Can't Find Audio Clip");
                     typeOfHighlight = 2;
                     highlightEffect.highlighted = false;
                     if (objColor == Color.black)

@@ -7,7 +7,9 @@ public class Teleportation : MonoBehaviour
     public Camera Cam;
     public GameObject leftController;
     public GameObject rightController;
-    public InputManager IM;
+    private InputManager IM;
+    private ArrowTrigger triggerScript;
+    private Wim wim;
 
     public Material areaVisibleMaterial;
     public Material areaLockedMaterial;
@@ -22,7 +24,11 @@ public class Teleportation : MonoBehaviour
 
     private GameObject user;
     private TpArc tpArc;
-    private bool draw = true;
+    private bool draw = false;
+
+    public delegate void methodCall();
+    public methodCall inTeleport;
+    public methodCall outTeleport;
     // Start is called before the first frame update
     void Start()
     {
@@ -36,33 +42,22 @@ public class Teleportation : MonoBehaviour
         Draw();
         InputHandler();
     }
-
-    private void OnEnable()
-    {
-        ArrowTrigger handCollider = rightController.transform.GetComponentInChildren<ArrowTrigger>();
-        handCollider.EnterWim += onEnteringWim;
-        handCollider.LeaveWim += onLeavingWim;
-    }
-
-    private void OnDisable()
-    {
-        ArrowTrigger handCollider = rightController.transform.GetComponentInChildren<ArrowTrigger>();
-        handCollider.EnterWim -= onEnteringWim;
-        handCollider.LeaveWim -= onLeavingWim;
-    }
     // run on start
     private void InitEnv()
     {
         user = transform.parent.gameObject;
         tpArc = GetComponent<TpArc>();
         tpPoint = transform.Find("TeleportPoint").gameObject;
-        if(IM == null)
-            IM = FindObjectOfType<InputManager>();
+        tpPoint.SetActive(false);
+        triggerScript = rightController.GetComponentInChildren<ArrowTrigger>();
+        wim = user.GetComponent<Wim>();
+        if (IM == null)
+            IM = ProjectManager.Instance.getInputManager();
     }
 
     private void InitSettings()
     {
-        tpArc.traceLayerMask = 1 << LayerMask.NameToLayer("Background");
+        tpArc.traceLayerMask = 1 << LayerMask.NameToLayer("Background") | 1 << LayerMask.NameToLayer("SelectableBackground");
         tpArc.Show();  
     }
     // run by update
@@ -83,31 +78,47 @@ public class Teleportation : MonoBehaviour
         }
         else
         {
-            if (!tpPoint.activeSelf) tpPoint.SetActive(true);
-            tpPoint.transform.position = hitinfo.point;
+            if (!tpPoint.activeSelf) tpPoint.SetActive(true); // turn on if tpPoint is deacctive
+            tpPoint.transform.position = hitinfo.point; //teleport
         }
     }
 
+    //private void LocalWimTeleport()
+    //{
+    //    if(triggerScript.getCollidingObject() != null)
+    //    {
+    //        wim.MoveUserOnLocalWim(triggerScript.getCollidingPoint());
+    //    }
+    //}
+
     private void InputHandler()
     {
+        if(IM.RightHand().Touchpad.axis.magnitude != 0 && draw == false)
+        {   // draw the arc if user touches the touchpad
+            draw = true;
+            tpArc.Show();
+            tpPoint.SetActive(true);
+            inTeleport();
+        }
+        else 
+        if(IM.RightHand().Touchpad.axis.magnitude == 0 && draw == true)
+        {
+            // clear the arc if user leaves
+            draw = false;
+            tpArc.Hide();
+            tpPoint.SetActive(false);
+            outTeleport();
+        }
+
         if(IM.RightHand().Touchpad.key.press && draw)
         {
             user.transform.position = tpPoint.transform.position;
         }
-    }
 
-    private void onEnteringWim()
-    {
-        draw = false;
-        tpArc.Hide();
-        tpPoint.SetActive(false);
-    }
-
-    private void onLeavingWim()
-    {
-        draw = true;
-        tpArc.Show();
-        tpPoint.SetActive(true);
+        //if(IM.RightHand().Trigger.press)
+        //{
+        //    LocalWimTeleport();
+        //}
     }
     // public
 }

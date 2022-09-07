@@ -43,7 +43,6 @@ public class RoiGrab : MonoBehaviour
         if (((m_controllerPress.GetStateUp(SteamVR_Input_Sources.RightHand) && whichhand) || (m_controllerPress.GetStateUp(SteamVR_Input_Sources.LeftHand) && !whichhand)) && grabbed)
         {
             grabbed = false;
-            wim.Teleport();
         }
         if(grabbed)
         {

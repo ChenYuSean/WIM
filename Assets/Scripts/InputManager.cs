@@ -25,6 +25,7 @@ public class InputManager : MonoBehaviour
 
     public struct Controller 
     {
+        public string Hand;
         public Touchpad Touchpad;
         public InputKey Trigger;
         public InputKey Grip;
@@ -66,7 +67,11 @@ public class InputManager : MonoBehaviour
         Action_Grip = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("PressGrabGrip");
     }
 
-    // Update is called once per frame
+    private void Start()
+    {
+        left.Hand = "Left";
+        right.Hand = "Right";
+    }
     void Update()
     {
         LeftHandInput();

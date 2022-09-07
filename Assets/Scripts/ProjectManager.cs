@@ -9,6 +9,8 @@ public class ProjectManager : MonoBehaviour
     private AudioClip[] SFX;
     [SerializeField]
     private GameObject CameraRig;
+    [SerializeField]
+    private InputManager InputMgr;
     void Awake()
     {
         if (Instance == null)
@@ -29,5 +31,10 @@ public class ProjectManager : MonoBehaviour
     public GameObject getCameraRig()
     {
         return CameraRig;
+    }
+
+    public InputManager getInputManager()
+    {
+        return InputMgr;
     }
 }

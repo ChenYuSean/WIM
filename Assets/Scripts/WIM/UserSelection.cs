@@ -32,6 +32,8 @@ public class UserSelection : MonoBehaviour
 
     private GameObject SelectedObj;
     private GameObject SelectedObjR;
+
+    private int drawLock = 1; //control when to draw on Leaving Wim or Leaving TeleportingMode
     void Start()
     {
         InitEnv();
@@ -43,28 +45,40 @@ public class UserSelection : MonoBehaviour
         getRay();
         DrawLine();
         RayCasting();
-
         NearFieldSelection();
     }
 
     private void OnEnable()
     {
-        ArrowTrigger handCollider = leftController.transform.GetComponentInChildren<ArrowTrigger>();
+        ArrowTrigger handCollider;
+        handCollider = leftController.transform.GetComponentInChildren<ArrowTrigger>();
         handCollider.EnterWim += OnEnteringWim;
         handCollider.LeaveWim += OnLeavingWim;
+
+        handCollider = rightController.transform.GetComponentInChildren<ArrowTrigger>();
+        handCollider.EnterWim += OnEnteringWim;
+        handCollider.LeaveWim += OnLeavingWim;
+
+        Teleportation tpScript = ProjectManager.Instance.getCameraRig().GetComponentInChildren<Teleportation>();
+        tpScript.inTeleport += OnTpMode;
+        tpScript.outTeleport += OnLeavingTpMode;
     }
 
     private void OnDisable()
     {
-        ArrowTrigger handCollider = leftController.transform.GetComponentInChildren<ArrowTrigger>();
-        handCollider.EnterWim -= OnEnteringWim;
-        handCollider.LeaveWim -= OnLeavingWim;
+        triggerScriptL.EnterWim -= OnEnteringWim;
+        triggerScriptL.LeaveWim -= OnLeavingWim;
+        triggerScriptR.EnterWim -= OnEnteringWim;
+        triggerScriptR.LeaveWim -= OnLeavingWim;
+        Teleportation tpScript = ProjectManager.Instance.getCameraRig().GetComponentInChildren<Teleportation>();
+        tpScript.inTeleport -= OnTpMode;
+        tpScript.outTeleport -= OnLeavingTpMode;
     }
 
     // Belowed functions called on Start
     /**
      * <summary>
-     * Initiate the variable
+     * Initiate the variables
      * </summary>
      */
     private void InitEnv()
@@ -73,7 +87,7 @@ public class UserSelection : MonoBehaviour
         BubbleDiskR = rightController.transform.Find("Bubble").gameObject;
         BubbleDiskL.SetActive(false);
         BubbleDiskR.SetActive(false);
-        IM = GetComponent<InputManager>();
+        IM = ProjectManager.Instance.getInputManager();
         triggerScriptL = leftController.GetComponentInChildren<ArrowTrigger>();
         triggerScriptR = rightController.GetComponentInChildren<ArrowTrigger>();
         triggerScriptL.active = true;
@@ -90,7 +104,7 @@ public class UserSelection : MonoBehaviour
         leftRay = new Linedrawer();
         rightRay = new Linedrawer();
         leftDraw = true;
-        rightDraw = false;
+        rightDraw = true;
     }
 
 
@@ -129,37 +143,51 @@ public class UserSelection : MonoBehaviour
      * </summary>
      */
     private void RayCasting()
+    { 
+        Casting(IM.LeftHand(),RayOriginL, RayDirectionL, RayLengthL, leftDraw);
+        Casting(IM.RightHand(),RayOriginR, RayDirectionR, RayLengthR, rightDraw);
+    }
+
+    private void Casting(InputManager.Controller Controller,Vector3 RayOrigin,Vector3 RayDirection,float RayLength,bool isDraw)
     {
+        int layerMask = 1 << LayerMask.NameToLayer("SelectableBackground");
+        bool isRight = false;
+        if (Controller.Hand == "Right")
+            isRight = true;
         var preSelected = SelectedObj;
-        int layerMask = 1 << LayerMask.NameToLayer("Background");
-        if (leftDraw)
+        if (isDraw)
         {
-            RaycastHit lhit;
-            if (Physics.Raycast(RayOriginL, RayDirectionL, out lhit, RayLengthL, layerMask))
+            RaycastHit hit;
+            if (Physics.Raycast(RayOrigin, RayDirection, out hit, RayLength, layerMask))
             {
-                BubbleDiskL.SetActive(false);
-                BubbleDiskR.SetActive(false);
-                SelectedObj = lhit.collider.gameObject;
+                if (BubbleDiskL.activeSelf) BubbleDiskL.SetActive(false);
+                if (BubbleDiskR.activeSelf) BubbleDiskR.SetActive(false);
+                SelectedObj = hit.collider.gameObject;
                 SetHighlight(SelectedObj, "Touch", true);
             }
             else
             {
-                SelectedObj = BubbleMechanism(false, layerMask);
+                SelectedObj = BubbleMechanism(isRight, layerMask);
             }
 
             if (preSelected != SelectedObj)
                 SetHighlight(preSelected, "Touch", false);
 
-            if (IM.LeftHand().Trigger.press && SelectedObj != null)
+            if (Controller.Trigger.press && SelectedObj != null)
             {
                 SetHighlight(SelectedObj, "Grab", true);
                 SetHighlight(SelectedObj.GetComponent<ObjectParentChildInfo>().child, "Grab", true);
             }
         }
+        else
+        {
+            SetHighlight(preSelected, "Touch", false);
+        }
     }
     /**
-     *<summary>
+     * <summary>
      * Turn on or off the line drawer. Also clear the line in scene when turn off.
+     * </summary>
      */
     private void ToggleDraw(bool isRight,bool OnOff)
     {
@@ -173,6 +201,7 @@ public class UserSelection : MonoBehaviour
             {
                 rightDraw = false;
                 rightRay.DrawLineInGameView(RayOriginR, RayOriginR, Color.red);
+                BubbleDiskR.SetActive(false);
             }
         }
         else
@@ -185,12 +214,12 @@ public class UserSelection : MonoBehaviour
             {
                 leftDraw = false;
                 leftRay.DrawLineInGameView(RayOriginL, RayOriginL, Color.red);
+                BubbleDiskL.SetActive(false);
             }
         }
     }
 
     /**
-     * 
      * <summary>
      * Bubble Mechanism is used for selected the closest object to the ray.Has the 5 degree of tolerance between ray and target.<br/> 
      * <paramref name="isRight"/> determined the ray is casted at right or left.
@@ -307,6 +336,7 @@ public class UserSelection : MonoBehaviour
     /**
      * <summary>
      * calculate the distance betweem object and the ray. Using origin and direction to determine the ray.
+     * </summary>
      */
     float DisPoint2Line(Collider obj, Vector3 ori, Vector3 dir)
     {
@@ -319,6 +349,11 @@ public class UserSelection : MonoBehaviour
         return trueDis;
     }
 
+    /**
+     * <summary>
+     * Select the target in NearField by Arrow
+     * </summary>
+     */
     private void NearFieldSelection()
     {
         // Left
@@ -361,14 +396,46 @@ public class UserSelection : MonoBehaviour
         }
     }
 
-    private void OnEnteringWim()
+    // Listener Fuctions
+    private void OnEnteringWim(GameObject Controller)
     {
-        ToggleDraw(false, false);
+        //Debug.Log(Controller.name + "is entering wim");
+        if (GameObject.ReferenceEquals(Controller, leftController))
+            ToggleDraw(false, false);
+        else if (GameObject.ReferenceEquals(Controller, rightController))
+        {
+            ToggleDraw(true, false);
+            drawLock--;
+        }
+    }   
+
+    private void OnLeavingWim(GameObject Controller)
+    {
+        //Debug.Log(Controller.name + " is leaving wim");
+        if (GameObject.ReferenceEquals(Controller, leftController))
+            ToggleDraw(false, true);
+        else if (GameObject.ReferenceEquals(Controller, rightController))
+        {
+            if(drawLock == 0)
+                ToggleDraw(true, true);
+            drawLock++;
+            if (drawLock > 1) // Application Starting fix
+                drawLock = 1;
+        }
+    }
+    private void OnTpMode()
+    {
+        ToggleDraw(true, false);
+        drawLock--;
     }
 
-    private void OnLeavingWim()
+    private void OnLeavingTpMode()
     {
-        ToggleDraw(false, true);
+        if (drawLock == 0)
+            ToggleDraw(true, true);
+        drawLock++;
+        if (drawLock > 1) // Application Starting fix
+            drawLock = 1;
     }
     // Belowed functions are Public
 }

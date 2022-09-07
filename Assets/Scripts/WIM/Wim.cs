@@ -30,6 +30,7 @@ public class Wim : MonoBehaviour
     private GameObject trackingRoiLocalPosition;
     private GameObject trackingRoiGlobalPosition;
     private GameObject userPosOnWim;
+    private GameObject userPosOnLocalWim;
     private Transform localRoi;
 
     private Transform globalWimBoundary;
@@ -47,8 +48,9 @@ public class Wim : MonoBehaviour
         InitEnv();
         CreateWim();
         BindingWim();
-        HideLocalWim();
         InitRoiTracking();
+        InitUserTracking();
+        HideLocalWim();
         PosCalibrate();
     }
 
@@ -81,7 +83,7 @@ public class Wim : MonoBehaviour
         localWimLayer = LayerMask.NameToLayer("Local Wim");
         worldCenter = world.transform.Find("WimBoundary").GetComponent<BoxCollider>().bounds.center;
         worldRoi = world.transform.Find("ROI").gameObject;
-        IM = GetComponent<InputManager>();
+        IM = ProjectManager.Instance.getInputManager();
     }
 
     /**
@@ -114,12 +116,15 @@ public class Wim : MonoBehaviour
         localWim.transform.localScale = wimSize;
         localWim.transform.position = LocalWimDefaultPos.position;
         SetWimObjLayer(localWim, localWimLayer);
+        SetWimObjTag(localWim.transform.Find("Buildings").gameObject,"Selectable");
 
         localRoi = localWim.transform.Find("ROI");
         Destroy(localRoi.GetComponent<TriggerSensor>());
         localRoi.Find("RoiCollider").gameObject.SetActive(true);
         localRoi.GetComponentInChildren<MeshRenderer>().enabled = false;
         localRoi.GetComponentInChildren<BoxCollider>().enabled = true;
+        var scale = localRoi.transform.localScale;
+        localRoi.transform.localScale.Set(scale.x*1.5f,scale.y,scale.z*1.5f);
 
         Destroy(worldRoi.GetComponent<TriggerSensor>());
         worldRoi.GetComponentInChildren<MeshRenderer>().enabled = true;
@@ -137,13 +142,30 @@ public class Wim : MonoBehaviour
 
         trackingRoiGlobalPosition = new GameObject("Tracking Roi Global Position");
         trackingRoiGlobalPosition.transform.parent = globalWim.transform;
+    }
 
+    private void InitUserTracking()
+    {
         userPosOnWim = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         userPosOnWim.name = "User Position";
         var rend = userPosOnWim.GetComponent<Renderer>();
         rend.material.color = Color.red;
-        userPosOnWim.transform.localScale = wimSize*5;
+        userPosOnWim.transform.localScale = wimSize * 5;
         userPosOnWim.transform.parent = globalWim.transform;
+        userPosOnWim.AddComponent<ObjectParentChildInfo>();
+        SetWimObjLayer(userPosOnWim, globalWimLayer);
+
+        userPosOnLocalWim = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        userPosOnLocalWim.name = "User Position";
+        rend = userPosOnLocalWim.GetComponent<Renderer>();
+        rend.material.color = Color.red;
+        userPosOnLocalWim.transform.localScale = localWim.transform.localScale * 2;
+        userPosOnLocalWim.transform.parent = localWim.transform;    
+        userPosOnLocalWim.AddComponent<ObjectParentChildInfo>();
+        SetWimObjLayer(userPosOnLocalWim, localWimLayer);
+
+        userPosOnWim.GetComponent<ObjectParentChildInfo>().child = userPosOnLocalWim;
+        userPosOnLocalWim.GetComponent<ObjectParentChildInfo>().parent = userPosOnWim;
     }
 
     /**
@@ -167,6 +189,29 @@ public class Wim : MonoBehaviour
                 continue;
             }
             SetWimObjLayer(child.gameObject, newLayer);
+        }
+    }
+    /**
+     * <summary>
+     * Set the tag to the object and its child recursively.
+     * </summary>
+     */
+    void SetWimObjTag(GameObject obj, string tag)
+    {
+        if (null == obj)
+        {
+            return;
+        }
+
+        obj.tag = tag;
+
+        foreach (Transform child in obj.transform)
+        {
+            if (null == child)
+            {
+                continue;
+            }
+            SetWimObjTag(child.gameObject, tag);
         }
     }
     /**
@@ -298,7 +343,6 @@ public class Wim : MonoBehaviour
     private void PosCalibrate()
     {
         Invoke("UpdateCamera",1.0f);
-        Teleport();
     }
 
     // Belowed functions called during Update
@@ -393,15 +437,15 @@ public class Wim : MonoBehaviour
         var dis = transform.position - worldCenter;
         dis *= wimSize.x;
         userPosOnWim.transform.position = globalWimBoundary.position + dis;
+        userPosOnLocalWim.transform.localPosition = userPosOnWim.transform.localPosition;
     }
     // Belowed fuctions are Public
-    public void Teleport()
-    {
-        //var pos = worldRoi.transform.position;
-        //pos.y += 50;
-        //if (pos.y < 2) pos.y = 2;
-        //pos.z += 150;
-        //transform.position = pos;
-
-    }
+    //public void MoveUserOnLocalWim(Vector3 destination)
+    //{
+    //    userPosOnLocalWim.transform.position = destination;
+    //    userPosOnWim.transform.localPosition = userPosOnLocalWim.transform.localPosition;
+    //    var dis = userPosOnWim.transform.position - globalWimBoundary.position;
+    //    dis /= wimSize.x;
+    //    transform.position = worldCenter + dis;
+    //}
 }
