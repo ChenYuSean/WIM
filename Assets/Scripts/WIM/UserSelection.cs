@@ -406,6 +406,14 @@ public class UserSelection : MonoBehaviour
     }
 
     // Listener Fuctions
+    void DrawLock(int add)
+    {
+        drawLock += add;
+        if (drawLock > 1)
+            drawLock = 1;
+        if (drawLock < -1)
+            drawLock = -1;
+    }
     private void OnEnteringWim(GameObject Controller)
     {
         //Debug.Log(Controller.name + "is entering wim");
@@ -414,7 +422,7 @@ public class UserSelection : MonoBehaviour
         else if (GameObject.ReferenceEquals(Controller, rightController))
         {
             ToggleDraw(true, false);
-            drawLock--;
+            DrawLock(-1);
         }
     }   
 
@@ -427,24 +435,21 @@ public class UserSelection : MonoBehaviour
         {
             if(drawLock == 0)
                 ToggleDraw(true, true);
-            drawLock++;
-            if (drawLock > 1) // Application Starting fix
-                drawLock = 1;
+            DrawLock(1);
+
         }
     }
     private void OnTpModeEnter()
     {
         ToggleDraw(true, false);
-        drawLock--;
+        DrawLock(-1);
     }
 
     private void OnTpModeExit()
     {
         if (drawLock == 0)
             ToggleDraw(true, true);
-        drawLock++;
-        if (drawLock > 1) // Application Starting fix
-            drawLock = 1;
+        DrawLock(1);
     }
     // Belowed functions are Public
 }

@@ -97,7 +97,6 @@ public class Teleportation : MonoBehaviour
         {   // Draw the arc if user touches the touchpad
             draw = true;
             tpArc.Show();
-            tpPoint.SetActive(true);
             inTeleport?.Invoke();
         }
         else 

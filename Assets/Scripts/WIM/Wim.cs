@@ -360,6 +360,7 @@ public class Wim : MonoBehaviour
             /* old method
             trackingRoiLocalPosition.transform.localPosition = roiSensor.transform.localPosition;
             */
+
             // Caculate the center of the object in the ROI
             // using center as localRoi position could prevent unnecessary movement 
             List<GameObject> RoiObject = roiSensor.GetDetected();
@@ -440,8 +441,9 @@ public class Wim : MonoBehaviour
     private void UpdateCamera()
     {
         var DefaultWimPos = GlobalWimDefaultPos.parent;
-        DefaultWimPos.position = Cam.transform.position + Cam.transform.forward * 0.00f;
-        //DefaultWimPos.rotation = Cam.transform.rotation;
+        DefaultWimPos.rotation = Cam.transform.rotation;
+        Vector3 projection = Vector3.ProjectOnPlane(Cam.transform.forward, Vector3.up).normalized;
+        DefaultWimPos.position = Cam.transform.position + projection * 0.1f + Vector3.down * 0.01f ;
     }
     private void UpdateUserPosOnWim()
     {

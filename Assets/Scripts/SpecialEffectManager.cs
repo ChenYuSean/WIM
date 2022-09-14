@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 using HighlightPlus;
 
@@ -17,7 +16,7 @@ public class SpecialEffectManager : MonoBehaviour
     }
     private void Start()
     {
-        myAudioSource = ProjectManager.Instance.getCameraRig().GetComponentInChildren<AudioSource>();
+        myAudioSource = ProjectManager.Instance.getCameraRig().transform.Find("CameraPos").GetComponent<AudioSource>();
         mAudioClips = ProjectManager.Instance.getAudioClips();
     }
 
@@ -91,13 +90,17 @@ public class SpecialEffectManager : MonoBehaviour
                     highlightEffect.highlighted = true;
                     break;
                 case "Grab":
-                    if (mAudioClips != null)
-                    {
+                   try{
+                        if (myAudioSource == null) Start();
                         myAudioSource.clip = mAudioClips[1];
                         myAudioSource.Play();
                     }
-                    else
+                    catch(Exception ex)
+                    {
                         Debug.LogError("Can't Find Audio Clip");
+                        Debug.LogException(ex);
+                    }
+
                     typeOfHighlight = 2;
                     highlightEffect.highlighted = false;
                     if (objColor == Color.black)
