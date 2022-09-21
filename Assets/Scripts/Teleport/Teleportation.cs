@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 
 public class Teleportation : MonoBehaviour
@@ -26,9 +25,9 @@ public class Teleportation : MonoBehaviour
     private TpArc tpArc;
     private bool draw = false;
 
-    public delegate void methodCall();
-    public methodCall inTeleport;
-    public methodCall outTeleport;
+    public event Action inTeleportMode; // void Func() delegate delcare and define
+    public event Action outTeleportMode;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -79,7 +78,7 @@ public class Teleportation : MonoBehaviour
         else
         {
             if (!tpPoint.activeSelf) tpPoint.SetActive(true); // turn on if tpPoint is deacctive
-            tpPoint.transform.position = hitinfo.point; //teleport
+            tpPoint.transform.position = hitinfo.point; //teleport point
         }
     }
 
@@ -93,26 +92,27 @@ public class Teleportation : MonoBehaviour
 
     private void InputHandler()
     {
-        if(IM.RightHand().Touchpad.axis.magnitude != 0 && draw == false)
+        if(IM.RightHand.Touchpad.axis.magnitude != 0 && draw == false)
         {   // Draw the arc if user touches the touchpad
             draw = true;
             tpArc.Show();
-            inTeleport?.Invoke();
+            inTeleportMode?.Invoke();
         }
         else 
-        if(IM.RightHand().Touchpad.axis.magnitude == 0 && draw == true)
+        if(IM.RightHand.Touchpad.axis.magnitude == 0 && draw == true)
         {
             // Clear the arc if user leaves
             draw = false;
             tpArc.Hide();
             tpPoint.SetActive(false);
-            outTeleport?.Invoke();
+            outTeleportMode?.Invoke();
         }
 
         // Teleport Action(Touchpad press)
-        if(IM.RightHand().Touchpad.key.press && draw)
+        if(IM.RightHand.Touchpad.key.press && draw)
         {
             user.transform.position = tpPoint.transform.position;
+            wim.UpdateCamera();
         }
 
         //if (IM.RightHand().Trigger.press)

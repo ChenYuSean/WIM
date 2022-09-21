@@ -61,8 +61,8 @@ public class UserSelection : MonoBehaviour
         handCollider.LeaveWim += OnLeavingWim;
 
         Teleportation tpScript = ProjectManager.Instance.getCameraRig().GetComponentInChildren<Teleportation>();
-        tpScript.inTeleport += OnTpModeEnter;
-        tpScript.outTeleport += OnTpModeExit;
+        tpScript.inTeleportMode += OnTpModeEnter;
+        tpScript.outTeleportMode += OnTpModeExit;
     }
 
     private void OnDisable()
@@ -73,8 +73,8 @@ public class UserSelection : MonoBehaviour
         triggerScriptR.EnterWim -= OnEnteringWim;
         triggerScriptR.LeaveWim -= OnLeavingWim;
         Teleportation tpScript = ProjectManager.Instance.getCameraRig().GetComponentInChildren<Teleportation>();
-        tpScript.inTeleport -= OnTpModeEnter;
-        tpScript.outTeleport -= OnTpModeExit;
+        tpScript.inTeleportMode -= OnTpModeEnter;
+        tpScript.outTeleportMode -= OnTpModeExit;
     }
 
     // Belowed functions called on Start
@@ -146,8 +146,8 @@ public class UserSelection : MonoBehaviour
      */
     private void RayCasting()
     { 
-        Casting(IM.LeftHand(),RayOriginL, RayDirectionL, RayLengthL, leftDraw);
-        Casting(IM.RightHand(),RayOriginR, RayDirectionR, RayLengthR, rightDraw);
+        Casting(IM.LeftHand,RayOriginL, RayDirectionL, RayLengthL, leftDraw);
+        Casting(IM.RightHand,RayOriginR, RayDirectionR, RayLengthR, rightDraw);
     }
 
     private void Casting(InputManager.Controller Controller,Vector3 RayOrigin,Vector3 RayDirection,float RayLength,bool isDraw)
@@ -367,7 +367,7 @@ public class UserSelection : MonoBehaviour
             // highlight object when arrow touch it
             SetHighlight(SelectedObj, "Touch", true);
             // Select Action(trigger press)
-            if (IM.LeftHand().Trigger.press && SelectedObj != null)
+            if (IM.LeftHand.Trigger.press && SelectedObj != null)
             {
                 SetHighlight(SelectedObj, "Grab", true);
                 SetHighlight(SelectedObj.GetComponent<ObjectParentChildInfo>().world, "Grab", true);
@@ -385,7 +385,7 @@ public class UserSelection : MonoBehaviour
             // highlight object when arrow touch it
             SetHighlight(SelectedObjR, "Touch", true);
             // Select Action(trigger press)
-            if (IM.RightHand().Trigger.press && SelectedObjR != null)
+            if (IM.RightHand.Trigger.press && SelectedObjR != null)
             {
                 SetHighlight(SelectedObjR, "Grab", true);
                 SetHighlight(SelectedObjR.GetComponent<ObjectParentChildInfo>().world, "Grab", true);

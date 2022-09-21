@@ -39,10 +39,6 @@ public class Wim : MonoBehaviour
     private Vector3 worldCenter;
     private GameObject worldRoi;
 
-    void Awake()
-    {
-
-    }
     void Start()
     {
         InitEnv();
@@ -124,7 +120,7 @@ public class Wim : MonoBehaviour
         localRoi.GetComponentInChildren<MeshRenderer>().enabled = false;
         localRoi.GetComponentInChildren<BoxCollider>().enabled = true;
         var scale = localRoi.transform.localScale;
-        localRoi.transform.localScale.Set(scale.x*1.5f,scale.y,scale.z*1.5f);
+        localRoi.transform.localScale.Set(scale.x * 2.0f,scale.y,scale.z * 2.0f);
 
         Destroy(worldRoi.GetComponent<TriggerSensor>());
         worldRoi.GetComponentInChildren<MeshRenderer>().enabled = true;
@@ -238,7 +234,7 @@ public class Wim : MonoBehaviour
 
     private void SaveWorldObjInBuffer(GameObject obj)
     {
-        if (null == obj)
+        if (null == obj || obj.name == "ROI")
         {
             return;
         }
@@ -266,7 +262,7 @@ public class Wim : MonoBehaviour
 
     private void SaveWimObjInBuffer(GameObject obj)
     {
-        if (null == obj)
+        if (null == obj || obj.name == "ROI")
         {
             return;
         }
@@ -294,7 +290,7 @@ public class Wim : MonoBehaviour
 
     private void BindingObjByBuffer(GameObject objectInLocalWim)
     {
-        if (null == objectInLocalWim)
+        if (null == objectInLocalWim || objectInLocalWim.name == "ROI")
         {
             return;
         }
@@ -434,17 +430,10 @@ public class Wim : MonoBehaviour
     
     private void InputHandler()
     {
-        if (IM.RightHand().Menu.press)
+        if (IM.RightHand.Menu.press)
             UpdateCamera();
     }
 
-    private void UpdateCamera()
-    {
-        var DefaultWimPos = GlobalWimDefaultPos.parent;
-        DefaultWimPos.rotation = Cam.transform.rotation;
-        Vector3 projection = Vector3.ProjectOnPlane(Cam.transform.forward, Vector3.up).normalized;
-        DefaultWimPos.position = Cam.transform.position + projection * 0.1f + Vector3.down * 0.01f ;
-    }
     private void UpdateUserPosOnWim()
     {
         var dis = transform.position - worldCenter;
@@ -452,7 +441,7 @@ public class Wim : MonoBehaviour
         userPosOnWim.transform.position = globalWimBoundary.position + dis;
         userPosOnLocalWim.transform.localPosition = userPosOnWim.transform.localPosition;
     }
-    // Belowed fuctions are Public
+    // Public
     public void MoveUserOnLocalWim(Vector3 destination)
     {
         userPosOnLocalWim.transform.position = destination;
@@ -460,5 +449,12 @@ public class Wim : MonoBehaviour
         var dis = userPosOnWim.transform.position - globalWimBoundary.position;
         dis /= wimSize.x;
         transform.position = worldCenter + dis;
+    }
+    public void UpdateCamera()
+    {
+        var DefaultWimPos = GlobalWimDefaultPos.parent;
+        Vector3 projection = Vector3.ProjectOnPlane(Cam.transform.forward, Vector3.up).normalized;
+        DefaultWimPos.rotation = Quaternion.LookRotation(projection, Vector3.up);
+        DefaultWimPos.position = Cam.transform.position + projection * 0.0f + Vector3.down * 0.01f;
     }
 }

@@ -12,6 +12,16 @@ public class InputManager : MonoBehaviour
     private Controller left;
     private Controller right;
 
+    public Controller LeftHand
+    {
+        get { return left; }
+    }
+
+    public Controller RightHand
+    {
+        get { return right; }
+    }
+
     internal SteamVR_Behaviour_Pose trackedObj;
     private SteamVR_Action_Boolean Action_Trigger;
     private SteamVR_Action_Boolean Action_Menu;
@@ -78,15 +88,15 @@ public class InputManager : MonoBehaviour
         RightHandInput();
     }
 
-    public Controller LeftHand()
-    {
-        return left;
-    }
+    //public Controller LeftHand()
+    //{
+    //    return left;
+    //}
 
-    public Controller RightHand()
-    {
-        return right;
-    }
+    //public Controller RightHand()
+    //{
+    //    return right;
+    //}
 
     private void LeftHandInput()
     {
