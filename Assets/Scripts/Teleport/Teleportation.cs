@@ -67,9 +67,10 @@ public class Teleportation : MonoBehaviour
         RaycastHit hitinfo;
         Vector3 start = rightController.transform.position;
         Vector3 velocity = rightController.transform.forward * arcDistance;
+        // draw the arc
         tpArc.SetArcData(start,velocity,true,false);
         tpArc.DrawArc(out hitinfo);
-
+        // draw the point
         if (hitinfo.collider == null)
         {
             tpPoint.SetActive(false);
