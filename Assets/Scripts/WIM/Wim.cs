@@ -39,6 +39,7 @@ public class Wim : MonoBehaviour
     private Vector3 worldCenter;
     private GameObject worldRoi;
 
+    private bool RoiLockOn = false;
     void Start()
     {
         InitEnv();
@@ -53,10 +54,9 @@ public class Wim : MonoBehaviour
     void Update()
     {
         TrackingRoiPos();
-        UpdateDefaultPos();
+        AutoUpdateDefaultPos();
         UpdateLocalWimSize();
-        UpdateLocalWimPos();
-        UpdateGlobalWimPos();
+        UpdateWimPos();
         UpdateWorldRoi();
         UpdateUserPosOnWim();
         InputHandler();
@@ -89,31 +89,33 @@ public class Wim : MonoBehaviour
      */
     void CreateWim()
     {
+        // create global wim
         globalWim = Instantiate(world);
         globalWim.name = "GlobalWim";
         globalWim.transform.localScale = wimSize;
         globalWim.transform.position = GlobalWimDefaultPos.position;
         SetWimObjLayer(globalWim, globalWimLayer);
-
+        // find global roi and turn on sensor
+        // global roi is used for detect object in range, and draw them on local wim
+        globalWim.transform.Find("ROI").GetComponent<RoiGrab>().enabled = true;
         roiSensor = globalWim.GetComponentInChildren<TriggerSensor>();
         roiSensor.transform.gameObject.SetActive(true);
         roiSensor.enabled = true;
         roiSensor.isROI = true;
-
-        globalWim.transform.Find("ROI").GetComponent<RoiGrab>().enabled = true;
-
+        // find the global wim boundary
         globalWimBoundary = globalWim.transform.Find("WimBoundary");
         globalWimBoundary.gameObject.SetActive(true);
         globalWimBoundary.GetComponent<BoxCollider>().enabled = true;
         roiBoundary = roiSensor.transform.Find("RoiCollider");
-
+        // create local wim
         localWim = Instantiate(world);
         localWim.name = "LocalWim";
         localWim.transform.localScale = wimSize;
         localWim.transform.position = LocalWimDefaultPos.position;
         SetWimObjLayer(localWim, localWimLayer);
         SetWimObjTag(localWim.transform.Find("Buildings").gameObject,"Selectable");
-
+        // find the local roi 
+        // local roi is used for detect whether controller is in local wim or not
         localRoi = localWim.transform.Find("ROI");
         Destroy(localRoi.GetComponent<TriggerSensor>());
         localRoi.Find("RoiCollider").gameObject.SetActive(true);
@@ -121,14 +123,14 @@ public class Wim : MonoBehaviour
         localRoi.GetComponentInChildren<BoxCollider>().enabled = true;
         var scale = localRoi.transform.localScale;
         localRoi.transform.localScale.Set(scale.x * 2.0f,scale.y,scale.z * 2.0f);
-
+        // destroy sensor on World Roi
         Destroy(worldRoi.GetComponent<TriggerSensor>());
         worldRoi.GetComponentInChildren<MeshRenderer>().enabled = true;
     }
 
     /**
      * <summary>
-     * Generate two game object to track local position of roi in local and global.
+     * Generate two dummy object to track local position of roi in local and global.
      * </summary>
      */
     void InitRoiTracking()
@@ -403,13 +405,11 @@ public class Wim : MonoBehaviour
         }
     }
 
-    private void UpdateLocalWimPos()
+    private void UpdateWimPos()
     {
+        // local
         localWim.transform.position = LocalWimDefaultPos.position + (localWim.transform.position - trackingRoiLocalPosition.transform.position);
-    }
-
-    private void UpdateGlobalWimPos()
-    {
+        // global
         globalWim.transform.position = GlobalWimDefaultPos.position;
     }
 
@@ -420,18 +420,25 @@ public class Wim : MonoBehaviour
         worldRoi.transform.position = worldCenter + dis;
     }
 
-    private void UpdateDefaultPos()
+    private void AutoUpdateDefaultPos()
     {
+        // fix the default pos if it's too far away from camera
         if((Cam.transform.position - GlobalWimDefaultPos.parent.position).magnitude > 0.33f)
         {
-            UpdateCamera();
+            UpdateDefaultPos(false);
         }
     }
     
     private void InputHandler()
     {
         if (IM.RightHand.Menu.press)
-            UpdateCamera();
+            UpdateDefaultPos(true);
+        if (IM.LeftHand.Touchpad.key.press)
+        {
+            RoiLockOn = !RoiLockOn;
+            ProjectManager.Instance.getAudioManager().setAudioClip(ProjectManager.Instance.getAudioClips()[2]);
+            ProjectManager.Instance.getAudioManager().playSound();
+        }
     }
 
     private void UpdateUserPosOnWim()
@@ -450,11 +457,15 @@ public class Wim : MonoBehaviour
         dis /= wimSize.x;
         transform.position = worldCenter + dis;
     }
-    public void UpdateCamera()
+    public void UpdateDefaultPos(bool isManual)
     {
         var DefaultWimPos = GlobalWimDefaultPos.parent;
         Vector3 projection = Vector3.ProjectOnPlane(Cam.transform.forward, Vector3.up).normalized;
         DefaultWimPos.rotation = Quaternion.LookRotation(projection, Vector3.up);
         DefaultWimPos.position = Cam.transform.position + projection * 0.0f + Vector3.down * 0.01f;
+        if(!isManual && RoiLockOn)
+        {
+            roiSensor.gameObject.transform.position = userPosOnWim.transform.position;
+        }
     }
 }

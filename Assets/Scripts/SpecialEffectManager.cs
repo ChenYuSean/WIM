@@ -8,15 +8,16 @@ public class SpecialEffectManager : MonoBehaviour
 
     public int typeOfHighlight = 0;
 
-    private AudioSource myAudioSource;
     private AudioClip[] mAudioClips;
+
+    private AudioManager AudioMgr;
     void Awake()
     {
         highlightEffect = GetComponent<HighlightEffect>();
     }
     private void Start()
     {
-        myAudioSource = ProjectManager.Instance.getCameraRig().transform.Find("CameraPos").GetComponent<AudioSource>();
+        AudioMgr = ProjectManager.Instance.getAudioManager();
         mAudioClips = ProjectManager.Instance.getAudioClips();
     }
 
@@ -91,13 +92,15 @@ public class SpecialEffectManager : MonoBehaviour
                     break;
                 case "Grab":
                    try{
-                        if (myAudioSource == null) Start();
-                        myAudioSource.clip = mAudioClips[1];
-                        myAudioSource.Play();
+                        // sometimes Audio Manager does not get the reference
+                        // Rerun the Start to get it
+                        if (AudioMgr is null)
+                            Start();
+                        AudioMgr.setAudioClip(mAudioClips[1]);
+                        AudioMgr.playSound();
                     }
                     catch(Exception ex)
                     {
-                        Debug.LogError("Can't Find Audio Clip");
                         Debug.LogException(ex);
                     }
 

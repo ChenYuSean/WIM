@@ -33,7 +33,7 @@ public class UserSelection : MonoBehaviour
     private GameObject SelectedObj;
     private GameObject SelectedObjR;
 
-    private int drawLock = 1; //control when to draw on Leaving Wim or Leaving TeleportingMode
+    private int drawFlag = 1; //control when to draw on Leaving Wim or Leaving TeleportingMode
     void Start()
     {
         InitEnv();
@@ -408,11 +408,11 @@ public class UserSelection : MonoBehaviour
     // Listener Fuctions
     void DrawLock(int add)
     {
-        drawLock += add;
-        if (drawLock > 1)
-            drawLock = 1;
-        if (drawLock < -1)
-            drawLock = -1;
+        drawFlag += add;
+        if (drawFlag > 1)
+            drawFlag = 1;
+        if (drawFlag < -1)
+            drawFlag = -1;
     }
     private void OnEnteringWim(GameObject Controller)
     {
@@ -433,7 +433,7 @@ public class UserSelection : MonoBehaviour
             ToggleDraw(false, true);
         else if (GameObject.ReferenceEquals(Controller, rightController))
         {
-            if(drawLock == 0)
+            if(drawFlag == 0)
                 ToggleDraw(true, true);
             DrawLock(1);
 
@@ -447,7 +447,7 @@ public class UserSelection : MonoBehaviour
 
     private void OnTpModeExit()
     {
-        if (drawLock == 0)
+        if (drawFlag == 0)
             ToggleDraw(true, true);
         DrawLock(1);
     }

@@ -11,6 +11,8 @@ public class ProjectManager : MonoBehaviour
     private GameObject CameraRig;
     [SerializeField]
     private InputManager InputMgr;
+    [SerializeField]
+    private AudioManager AudioMgr;
     void Awake()
     {
         if (Instance == null)
@@ -36,5 +38,10 @@ public class ProjectManager : MonoBehaviour
     public InputManager getInputManager()
     {
         return InputMgr;
+    }
+
+    public AudioManager getAudioManager()
+    {
+        return AudioMgr;
     }
 }

@@ -113,7 +113,7 @@ public class Teleportation : MonoBehaviour
         if(IM.RightHand.Touchpad.key.press && draw)
         {
             user.transform.position = tpPoint.transform.position;
-            wim.UpdateCamera();
+            wim.UpdateDefaultPos(false);
         }
 
         //if (IM.RightHand().Trigger.press)
