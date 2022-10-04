@@ -25,8 +25,9 @@ public class Teleportation : MonoBehaviour
     private TpArc tpArc;
     private bool draw = false;
 
-    public event Action inTeleportMode; // void Func() delegate delcare and define
-    public event Action outTeleportMode;
+    public event Action OnEnterTeleportMode; // void Func() delegate delcare and define
+    public event Action OnExitTeleportMode;
+    public event Action OnTeleport;
 
     // Start is called before the first frame update
     void Start()
@@ -87,7 +88,7 @@ public class Teleportation : MonoBehaviour
     {
         if (triggerScript.getCollidingObject() != null)
         {
-            wim.MoveUserOnLocalWim(triggerScript.getCollidingPoint());
+            wim.TeleportWim(triggerScript.getCollidingPoint());
         }
     }
 
@@ -97,7 +98,7 @@ public class Teleportation : MonoBehaviour
         {   // Draw the arc if user touches the touchpad
             draw = true;
             tpArc.Show();
-            inTeleportMode?.Invoke();
+            OnEnterTeleportMode?.Invoke();
         }
         else 
         if(IM.RightHand.Touchpad.axis.magnitude == 0 && draw == true)
@@ -106,16 +107,17 @@ public class Teleportation : MonoBehaviour
             draw = false;
             tpArc.Hide();
             tpPoint.SetActive(false);
-            outTeleportMode?.Invoke();
+            OnExitTeleportMode?.Invoke();
         }
 
         // Teleport Action(Touchpad press)
         if(IM.RightHand.Touchpad.key.press && draw)
         {
             user.transform.position = tpPoint.transform.position;
-            wim.UpdateDefaultPos(false);
+            OnTeleport?.Invoke();
         }
 
+        // Teleport with wim
         //if (IM.RightHand().Trigger.press)
         //{
         //    LocalWimTeleport();

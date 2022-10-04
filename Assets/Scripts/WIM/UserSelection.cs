@@ -53,28 +53,28 @@ public class UserSelection : MonoBehaviour
         // adding listener to broadcast
         ArrowTrigger handCollider;
         handCollider = leftController.transform.GetComponentInChildren<ArrowTrigger>();
-        handCollider.EnterWim += OnEnteringWim;
-        handCollider.LeaveWim += OnLeavingWim;
+        handCollider.OnEnterWim += EnteringWim;
+        handCollider.OnExitWim += LeavingWim;
 
         handCollider = rightController.transform.GetComponentInChildren<ArrowTrigger>();
-        handCollider.EnterWim += OnEnteringWim;
-        handCollider.LeaveWim += OnLeavingWim;
+        handCollider.OnEnterWim += EnteringWim;
+        handCollider.OnExitWim += LeavingWim;
 
         Teleportation tpScript = ProjectManager.Instance.getCameraRig().GetComponentInChildren<Teleportation>();
-        tpScript.inTeleportMode += OnTpModeEnter;
-        tpScript.outTeleportMode += OnTpModeExit;
+        tpScript.OnEnterTeleportMode += TpModeEnter;
+        tpScript.OnExitTeleportMode += TpModeExit;
     }
 
     private void OnDisable()
     {
         // remove listener from broadcast
-        triggerScriptL.EnterWim -= OnEnteringWim;
-        triggerScriptL.LeaveWim -= OnLeavingWim;
-        triggerScriptR.EnterWim -= OnEnteringWim;
-        triggerScriptR.LeaveWim -= OnLeavingWim;
+        triggerScriptL.OnEnterWim -= EnteringWim;
+        triggerScriptL.OnExitWim -= LeavingWim;
+        triggerScriptR.OnEnterWim -= EnteringWim;
+        triggerScriptR.OnExitWim -= LeavingWim;
         Teleportation tpScript = ProjectManager.Instance.getCameraRig().GetComponentInChildren<Teleportation>();
-        tpScript.inTeleportMode -= OnTpModeEnter;
-        tpScript.outTeleportMode -= OnTpModeExit;
+        tpScript.OnEnterTeleportMode -= TpModeEnter;
+        tpScript.OnExitTeleportMode -= TpModeExit;
     }
 
     // Belowed functions called on Start
@@ -414,7 +414,7 @@ public class UserSelection : MonoBehaviour
         if (drawFlag < -1)
             drawFlag = -1;
     }
-    private void OnEnteringWim(GameObject Controller)
+    private void EnteringWim(GameObject Controller)
     {
         //Debug.Log(Controller.name + "is entering wim");
         if (GameObject.ReferenceEquals(Controller, leftController))
@@ -426,7 +426,7 @@ public class UserSelection : MonoBehaviour
         }
     }   
 
-    private void OnLeavingWim(GameObject Controller)
+    private void LeavingWim(GameObject Controller)
     {
         //Debug.Log(Controller.name + " is leaving wim");
         if (GameObject.ReferenceEquals(Controller, leftController))
@@ -439,13 +439,13 @@ public class UserSelection : MonoBehaviour
 
         }
     }
-    private void OnTpModeEnter()
+    private void TpModeEnter()
     {
         ToggleDraw(true, false);
         DrawLock(-1);
     }
 
-    private void OnTpModeExit()
+    private void TpModeExit()
     {
         if (drawFlag == 0)
             ToggleDraw(true, true);

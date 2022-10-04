@@ -8,8 +8,8 @@ public class ArrowTrigger : MonoBehaviour
     Vector3 point;
     public bool active = false;
     public delegate void triggerCall(GameObject Controller);
-    public triggerCall EnterWim;
-    public triggerCall LeaveWim;
+    public triggerCall OnEnterWim;
+    public triggerCall OnExitWim;
 
     private Vector3 ArrowTip;
     private int layerMask;
@@ -35,7 +35,7 @@ public class ArrowTrigger : MonoBehaviour
             
         if (WimCheck(other))
         {
-            EnterWim?.Invoke(this.transform.parent.gameObject);
+            OnEnterWim?.Invoke(this.transform.parent.gameObject);
         }
     }
 
@@ -49,7 +49,7 @@ public class ArrowTrigger : MonoBehaviour
         SetHighlight(hit, "Touch", false);
         if (WimCheck(other))
         {
-            LeaveWim?.Invoke(this.transform.parent.gameObject);
+            OnExitWim?.Invoke(this.transform.parent.gameObject);
         }
     }
 

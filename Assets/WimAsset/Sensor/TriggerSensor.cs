@@ -38,8 +38,10 @@ namespace SensorToolkit
         List<GameObject> tempGOList = new List<GameObject>();
         List<Collider> tempColliderList = new List<Collider>();
 
+        // added public
         public bool isROI = false;
-
+        public event Action<Collider> OnEnterRoi; 
+        public event Action<Collider> OnExitRoi; 
         // Pulses the sensor, causing it to refresh its line of sight tests.
         public override void Pulse()
         {
@@ -150,18 +152,7 @@ namespace SensorToolkit
 
             if (isROI == true)
             {
-                ObjectParentChildInfo o = other.GetComponent<ObjectParentChildInfo>();
-                if (o != null && o.child != null)
-                {
-                    //Debug.Log("Active");
-                    o.child.SetActive(true);
-                }
-            }
-
-            HighlightEffect highlight = other.GetComponent<HighlightEffect>();
-            if (highlight != null)
-            {
-                highlight.highlighted = true;
+                OnEnterRoi?.Invoke(other);
             }
 
             if (OnSensorUpdate != null) OnSensorUpdate();
@@ -180,17 +171,7 @@ namespace SensorToolkit
 
             if (isROI == true)
             {
-                ObjectParentChildInfo o = other.GetComponent<ObjectParentChildInfo>();
-                if(o != null && o.child != null)
-                {
-                    o.child.SetActive(false);
-                }
-            }
-
-            HighlightEffect highlight = other.GetComponent<HighlightEffect>();
-            if (highlight != null)
-            {
-                highlight.highlighted = false;
+                OnExitRoi?.Invoke(other);
             }
 
             if (OnSensorUpdate != null) OnSensorUpdate();
@@ -202,25 +183,15 @@ namespace SensorToolkit
             {
                 if (isROI == true)
                 {
-                    ObjectParentChildInfo o = other.GetComponent<ObjectParentChildInfo>();
-                    if (o != null && o.child != null)
-                    {
-                        o.child.SetActive(false);
-                    }
-                }
-
-                HighlightEffect highlight = other.GetComponent<HighlightEffect>();
-                if (highlight != null)
-                {
-                    highlight.highlighted = false;
+                    Collider c;
+                    if (other.TryGetComponent<Collider>(out c))
+                        OnExitRoi?.Invoke(c);
                 }
             }
             isColliderStale.Clear();
             DetectedObjects.Clear();
             if (OnSensorUpdate != null) OnSensorUpdate();
         }
-
-
 
         void testSensor()
         {
@@ -291,5 +262,6 @@ namespace SensorToolkit
         {
             removeAllCollider();
         }
+
     }
 }

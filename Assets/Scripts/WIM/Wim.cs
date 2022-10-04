@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Valve.VR;
 using UnityEngine;
 using SensorToolkit;
-
+using HighlightPlus;
 public class Wim : MonoBehaviour
 {
     private GameObject world;
@@ -39,7 +39,8 @@ public class Wim : MonoBehaviour
     private Vector3 worldCenter;
     private GameObject worldRoi;
 
-    private bool RoiLockOn = false;
+    public bool RoiLockOn = false;
+    private bool LockOnState = false;
     void Start()
     {
         InitEnv();
@@ -48,7 +49,7 @@ public class Wim : MonoBehaviour
         InitRoiTracking();
         InitUserTracking();
         HideLocalWim();
-        PosCalibrate();
+        StartCoroutine(PosCalibrate());
     }
 
     void Update()
@@ -62,6 +63,23 @@ public class Wim : MonoBehaviour
         InputHandler();
     }
 
+    private void OnEnable()
+    {
+        var tpscript = GetComponentInChildren<Teleportation>();
+        tpscript.OnTeleport += WimPosAtTeleport;
+        if(!(roiSensor is null))
+        {
+            roiSensor.OnEnterRoi += EnterRoi;
+            roiSensor.OnExitRoi += ExitRoi;
+        }
+    }
+    private void OnDisable()
+    {
+        var tpscript = GetComponentInChildren<Teleportation>();
+        tpscript.OnTeleport -= WimPosAtTeleport;
+        roiSensor.OnEnterRoi -= EnterRoi;
+        roiSensor.OnExitRoi -= ExitRoi;
+    }
     // Belowed functions called on Start
     /**
      * <summary>
@@ -102,6 +120,8 @@ public class Wim : MonoBehaviour
         roiSensor.transform.gameObject.SetActive(true);
         roiSensor.enabled = true;
         roiSensor.isROI = true;
+        roiSensor.OnEnterRoi += EnterRoi;
+        roiSensor.OnExitRoi += ExitRoi;
         // find the global wim boundary
         globalWimBoundary = globalWim.transform.Find("WimBoundary");
         globalWimBoundary.gameObject.SetActive(true);
@@ -118,13 +138,16 @@ public class Wim : MonoBehaviour
         // local roi is used for detect whether controller is in local wim or not
         localRoi = localWim.transform.Find("ROI");
         Destroy(localRoi.GetComponent<TriggerSensor>());
-        localRoi.Find("RoiCollider").gameObject.SetActive(true);
-        localRoi.GetComponentInChildren<MeshRenderer>().enabled = false;
-        localRoi.GetComponentInChildren<BoxCollider>().enabled = true;
+        Destroy(localRoi.GetComponent<RoiGrab>());
+        localRoi.Find("RoiCollider").gameObject.SetActive(true); // Active object
+        localRoi.GetComponentInChildren<BoxCollider>().enabled = true; // turn on collider 
+        localRoi.GetComponentInChildren<MeshRenderer>().enabled = false; // turn off renderer
         var scale = localRoi.transform.localScale;
-        localRoi.transform.localScale.Set(scale.x * 2.0f,scale.y,scale.z * 2.0f);
-        // destroy sensor on World Roi
+        localRoi.transform.localScale = new Vector3(scale.x * 1.5f,scale.y,scale.z * 1.5f);
+        // destroy component on World Roi
         Destroy(worldRoi.GetComponent<TriggerSensor>());
+        Destroy(worldRoi.GetComponent<RoiGrab>());
+        // (optional) turn on/off roi renderer (red box frame)
         worldRoi.GetComponentInChildren<MeshRenderer>().enabled = true;
     }
 
@@ -344,9 +367,10 @@ public class Wim : MonoBehaviour
      * Correct the position in the startup, Camera will correct after one second.
      * </summary> 
      */
-    private void PosCalibrate()
+    private IEnumerator PosCalibrate()
     {
-        Invoke("UpdateCamera",1.0f);
+        yield return new WaitForSeconds(1.0f);
+        UpdateDefaultPos();
     }
 
     // Belowed functions called during Update
@@ -425,20 +449,16 @@ public class Wim : MonoBehaviour
         // fix the default pos if it's too far away from camera
         if((Cam.transform.position - GlobalWimDefaultPos.parent.position).magnitude > 0.33f)
         {
-            UpdateDefaultPos(false);
+            UpdateDefaultPos();
         }
     }
     
     private void InputHandler()
     {
         if (IM.RightHand.Menu.press)
-            UpdateDefaultPos(true);
+            UpdateDefaultPos();
         if (IM.LeftHand.Touchpad.key.press)
-        {
-            RoiLockOn = !RoiLockOn;
-            ProjectManager.Instance.getAudioManager().setAudioClip(ProjectManager.Instance.getAudioClips()[2]);
-            ProjectManager.Instance.getAudioManager().playSound();
-        }
+            ToggleRoiLockOn();
     }
 
     private void UpdateUserPosOnWim()
@@ -448,8 +468,23 @@ public class Wim : MonoBehaviour
         userPosOnWim.transform.position = globalWimBoundary.position + dis;
         userPosOnLocalWim.transform.localPosition = userPosOnWim.transform.localPosition;
     }
+
+    private void ToggleRoiLockOn()
+    {
+        LockOnState = !LockOnState; // can only be toggle by this function
+        RoiLockOn = !RoiLockOn; // can be disable by grabing roi and auto enable when teleporting
+        ProjectManager.Instance.getAudioManager().setAudioClip(ProjectManager.Instance.getAudioClips()[2]);
+        ProjectManager.Instance.getAudioManager().playSound();
+        if(RoiLockOn)
+            roiSensor.gameObject.transform.position = userPosOnWim.transform.position;
+    }
     // Public
-    public void MoveUserOnLocalWim(Vector3 destination)
+    /**
+     * <summary>
+     * Teleport user to the location that is same on Wim
+     * </summary>
+     */
+    public void TeleportWim(Vector3 destination)     // Not in used
     {
         userPosOnLocalWim.transform.position = destination;
         userPosOnWim.transform.localPosition = userPosOnLocalWim.transform.localPosition;
@@ -457,15 +492,68 @@ public class Wim : MonoBehaviour
         dis /= wimSize.x;
         transform.position = worldCenter + dis;
     }
-    public void UpdateDefaultPos(bool isManual)
+    public void UpdateDefaultPos()
     {
         var DefaultWimPos = GlobalWimDefaultPos.parent;
         Vector3 projection = Vector3.ProjectOnPlane(Cam.transform.forward, Vector3.up).normalized;
         DefaultWimPos.rotation = Quaternion.LookRotation(projection, Vector3.up);
         DefaultWimPos.position = Cam.transform.position + projection * 0.0f + Vector3.down * 0.01f;
-        if(!isManual && RoiLockOn)
+    }
+
+    // Listener
+
+    /**
+     * <summary>
+     * Activate the object in local if the global one is entering the roi 
+     * Also highlight the global replica
+     * </summary>
+     */
+    private void EnterRoi(Collider other)
+    {
+        ObjectParentChildInfo o = other.GetComponent<ObjectParentChildInfo>();
+        if (o != null && o.child != null)
+        {
+            //Debug.Log("Active");
+            o.child.SetActive(true);
+        }
+
+        HighlightEffect highlight = other.GetComponent<HighlightEffect>();
+        if (highlight != null)
+        {
+            highlight.highlighted = true;
+        }
+    }
+    /**
+     * <summary>
+     * Deactivate the object in local if the global one is exiting the roi
+     * </summary>
+     */
+    private void ExitRoi(Collider other)
+    {
+        if (RoiLockOn || GameObject.ReferenceEquals(other, userPosOnWim))
         {
             roiSensor.gameObject.transform.position = userPosOnWim.transform.position;
         }
+
+        ObjectParentChildInfo o = other.GetComponent<ObjectParentChildInfo>();
+        if (o != null && o.child != null)
+        {
+            o.child.SetActive(false);
+        }
+
+        HighlightEffect highlight = other.GetComponent<HighlightEffect>();
+        if (highlight != null)
+        {
+            highlight.highlighted = false;
+        }
+
+    }
+
+    private void WimPosAtTeleport()
+    {
+        UpdateDefaultPos();
+        RoiLockOn = LockOnState;
+        if (RoiLockOn)
+            roiSensor.gameObject.transform.position = userPosOnWim.transform.position;
     }
 }

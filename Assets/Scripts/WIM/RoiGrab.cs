@@ -48,16 +48,14 @@ public class RoiGrab : MonoBehaviour
         {
             var diff =  Arrow.transform.position - lastPosistion;
             diff.y = 0;
-            if (diff.magnitude > deadzone)
+            if (diff.magnitude > deadzone) // eliminate the error of natural hand shake
             {
                 var pos = Arrow.transform.position;
-                pos.y -= RoiBound.transform.lossyScale.y * 0.5f;
+                pos.y -= RoiBound.transform.lossyScale.y * 0.5f; // offest the position to the tip of the arrow
                 transform.position = BoundaryCheck(pos);
             }
-
-
             lastPosistion = Arrow.transform.position;
-            
+            wim.RoiLockOn = false;
         }
     }
 
