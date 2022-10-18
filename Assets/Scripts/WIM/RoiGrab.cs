@@ -53,6 +53,7 @@ public class RoiGrab : MonoBehaviour
                 var pos = Arrow.transform.position;
                 pos.y -= RoiBound.transform.lossyScale.y * 0.5f; // offest the position to the tip of the arrow
                 transform.position = BoundaryCheck(pos);
+                //wim.RoiCenterlize();
             }
             lastPosistion = Arrow.transform.position;
             wim.RoiLockOn = false;
@@ -61,7 +62,7 @@ public class RoiGrab : MonoBehaviour
 
     /**<summary>
      * Return original position if it isn't out of boundary,
-     * Or else, set the corresponding coordinate to boundary point
+     * Or else, set the coordinate to the corresponding boundary point
      * </summary>
      */
     private Vector3 BoundaryCheck(Vector3 pos)

@@ -84,13 +84,6 @@ public class Teleportation : MonoBehaviour
         }
     }
 
-    private void LocalWimTeleport()
-    {
-        if (triggerScript.getCollidingObject() != null)
-        {
-            wim.TeleportWim(triggerScript.getCollidingPoint());
-        }
-    }
 
     private void InputHandler()
     {
@@ -117,11 +110,20 @@ public class Teleportation : MonoBehaviour
             OnTeleport?.Invoke();
         }
 
-        // Teleport with wim
-        //if (IM.RightHand().Trigger.press)
-        //{
-        //    LocalWimTeleport();
-        //}
+        //Teleport with wim
+        if (IM.RightHand.Trigger.press)
+        {
+            LocalWimTeleport();
+        }
     }
+
+    private void LocalWimTeleport()
+    {
+        if (triggerScript.getCollidingObject() != null)
+        {
+            wim.TeleportWim(triggerScript.getCollidingPoint());
+        }
+    }
+
     // public
 }

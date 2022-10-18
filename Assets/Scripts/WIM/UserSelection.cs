@@ -172,7 +172,7 @@ public class UserSelection : MonoBehaviour
             {   // or else use BubbleMechanism
                 SelectedObj = BubbleMechanism(isRight, layerMask);
             }
-            // Select Action(Trigger press)
+            // Select Action(Trigger press) 
             if (Controller.Trigger.press && SelectedObj != null)
             {
                 SetHighlight(SelectedObj, "Grab", true);

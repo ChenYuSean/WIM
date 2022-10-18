@@ -27,8 +27,12 @@ public class Wim : MonoBehaviour
 
     private int currentBufferIndex = 0;
     private TriggerSensor roiSensor;
-    private GameObject trackingRoiLocalPosition;
-    private GameObject trackingRoiGlobalPosition;
+    private GameObject trackingRoiinLocal;
+    private GameObject trackingRoiinGlobal;
+    private GameObject WimTeleportPoint;
+    private GameObject WimTPDestination;
+    //private GameObject localWimSpaceCenter;
+    //private GameObject globalWimSpaceCenter;
     private GameObject userPosOnWim;
     private GameObject userPosOnLocalWim;
     private Transform localRoi;
@@ -40,13 +44,15 @@ public class Wim : MonoBehaviour
     private GameObject worldRoi;
 
     public bool RoiLockOn = false;
-    private bool LockOnState = false;
+    private bool LockOnState = true;
+
+    private Collider[] globalWimObj;
     void Start()
     {
         InitEnv();
         CreateWim();
         BindingWim();
-        InitRoiTracking();
+        InitDummyTracking();
         InitUserTracking();
         HideLocalWim();
         StartCoroutine(PosCalibrate());
@@ -127,6 +133,8 @@ public class Wim : MonoBehaviour
         globalWimBoundary.gameObject.SetActive(true);
         globalWimBoundary.GetComponent<BoxCollider>().enabled = true;
         roiBoundary = roiSensor.transform.Find("RoiCollider");
+        globalWimObj = globalWim.GetComponentsInChildren<Collider>();
+
         // create local wim
         localWim = Instantiate(world);
         localWim.name = "LocalWim";
@@ -137,13 +145,15 @@ public class Wim : MonoBehaviour
         // find the local roi 
         // local roi is used for detect whether controller is in local wim or not
         localRoi = localWim.transform.Find("ROI");
+        SetWimObjLayer(localRoi.gameObject,LayerMask.NameToLayer("LocalRoi"));
         Destroy(localRoi.GetComponent<TriggerSensor>());
         Destroy(localRoi.GetComponent<RoiGrab>());
-        localRoi.Find("RoiCollider").gameObject.SetActive(true); // Active object
-        localRoi.GetComponentInChildren<BoxCollider>().enabled = true; // turn on collider 
-        localRoi.GetComponentInChildren<MeshRenderer>().enabled = false; // turn off renderer
-        var scale = localRoi.transform.localScale;
-        localRoi.transform.localScale = new Vector3(scale.x * 1.5f,scale.y,scale.z * 1.5f);
+        var localRoiCollider = localRoi.Find("RoiCollider"); // Active object
+        localRoiCollider.gameObject.SetActive(true);
+        localRoiCollider.GetComponent<BoxCollider>().enabled = true; // turn on collider 
+        localRoiCollider.GetComponent<MeshRenderer>().enabled = false; // turn off renderer
+        var scale = localRoiCollider.transform.localScale;
+        localRoiCollider.transform.localScale = new Vector3(scale.x * 1.5f,scale.y,scale.z * 1.5f);
         // destroy component on World Roi
         Destroy(worldRoi.GetComponent<TriggerSensor>());
         Destroy(worldRoi.GetComponent<RoiGrab>());
@@ -153,16 +163,24 @@ public class Wim : MonoBehaviour
 
     /**
      * <summary>
-     * Generate two dummy object to track local position of roi in local and global.
+     * Generate dummy object to track local position in local and global.
      * </summary>
      */
-    void InitRoiTracking()
+    void InitDummyTracking()
     {
-        trackingRoiLocalPosition = new GameObject("Tracking Roi Local Position");
-        trackingRoiLocalPosition.transform.parent = localWim.transform;
+        trackingRoiinLocal = new GameObject("Tracking Roi in Local");
+        trackingRoiinLocal.transform.parent = localWim.transform;
 
-        trackingRoiGlobalPosition = new GameObject("Tracking Roi Global Position");
-        trackingRoiGlobalPosition.transform.parent = globalWim.transform;
+        trackingRoiinGlobal = new GameObject("Tracking Roi in Global");
+        trackingRoiinGlobal.transform.parent = globalWim.transform;
+
+        WimTeleportPoint = new GameObject("Teleport point in Wim");
+        WimTeleportPoint.transform.parent = localWim.transform;
+        WimTPDestination = new GameObject("Wim Teleport");
+        WimTPDestination.transform.parent = world.transform;
+        //localWimSpaceCenter = new GameObject("Local Wim Space Center");
+        //RoiCenterlize();
+        //globalWimSpaceCenter = new GameObject("Global Wim Space Center");
     }
 
     /**
@@ -373,11 +391,11 @@ public class Wim : MonoBehaviour
         UpdateDefaultPos();
     }
 
-    // Belowed functions called during Update
+    // Belowed functions called during Update ----------------------------------------------------------
 
     private void TrackingRoiPos()
     {
-        if (trackingRoiLocalPosition != null)
+        if (trackingRoiinLocal != null)
         {
             /* old method
             trackingRoiLocalPosition.transform.localPosition = roiSensor.transform.localPosition;
@@ -403,11 +421,12 @@ public class Wim : MonoBehaviour
             // Set the dummy(trackingRoiGlobalPosition) position to centerPosOfRoi
             // then get the dummy localPosition under global Wim
             // Since localRoi and globalRoi has same local position under each WIM
-            // assign localRoi with globalRoi local position would get the true position
-            trackingRoiGlobalPosition.transform.position = centerPosOfRoi;
-            trackingRoiLocalPosition.transform.localPosition = trackingRoiGlobalPosition.transform.localPosition;
+            // assign localRoi with globalRoi local position would get the position of same spot
+            trackingRoiinGlobal.transform.position = centerPosOfRoi;
+            trackingRoiinLocal.transform.localPosition = trackingRoiinGlobal.transform.localPosition;
+            
             // local Roi are used in checking the controller is in the Local WIM
-            localRoi.transform.position = trackingRoiLocalPosition.transform.position;
+            localRoi.transform.position = trackingRoiinLocal.transform.position;
         }
     }
 
@@ -432,7 +451,8 @@ public class Wim : MonoBehaviour
     private void UpdateWimPos()
     {
         // local
-        localWim.transform.position = LocalWimDefaultPos.position + (localWim.transform.position - trackingRoiLocalPosition.transform.position);
+        localWim.transform.position = LocalWimDefaultPos.position + (localWim.transform.position - trackingRoiinLocal.transform.position);
+        //localWimSpaceCenter.transform.position = LocalWimDefaultPos.position;
         // global
         globalWim.transform.position = GlobalWimDefaultPos.position;
     }
@@ -444,23 +464,6 @@ public class Wim : MonoBehaviour
         worldRoi.transform.position = worldCenter + dis;
     }
 
-    private void AutoUpdateDefaultPos()
-    {
-        // fix the default pos if it's too far away from camera
-        if((Cam.transform.position - GlobalWimDefaultPos.parent.position).magnitude > 0.33f)
-        {
-            UpdateDefaultPos();
-        }
-    }
-    
-    private void InputHandler()
-    {
-        if (IM.RightHand.Menu.press)
-            UpdateDefaultPos();
-        if (IM.LeftHand.Touchpad.key.press)
-            ToggleRoiLockOn();
-    }
-
     private void UpdateUserPosOnWim()
     {
         var dis = transform.position - worldCenter;
@@ -469,6 +472,30 @@ public class Wim : MonoBehaviour
         userPosOnLocalWim.transform.localPosition = userPosOnWim.transform.localPosition;
     }
 
+    private void AutoUpdateDefaultPos()
+    {
+        // fix the default pos if it's too far away from camera
+        if((Cam.transform.position - GlobalWimDefaultPos.parent.position).magnitude > 0.33f)
+        {
+            UpdateDefaultPos();
+        }
+    }
+
+    // Input Actions
+    private void InputHandler()
+    {
+        if (IM.RightHand.Menu.press)
+            UpdateDefaultPos();
+        if (IM.LeftHand.Touchpad.down.press)
+            ZoomInGlobal();
+    }
+
+    /** <summary>
+     *  Let user turn on lock on mode for Roi following user when teleporting. <br/>
+     *  Default is ON.
+     *  Not in used.
+     *  </summary>
+     */
     private void ToggleRoiLockOn()
     {
         LockOnState = !LockOnState; // can only be toggle by this function
@@ -478,20 +505,43 @@ public class Wim : MonoBehaviour
         if(RoiLockOn)
             roiSensor.gameObject.transform.position = userPosOnWim.transform.position;
     }
-    // Public
+
+    private void ZoomInGlobal()
+    {
+        if (globalWim.transform.localScale.magnitude > 0.5)
+            return;
+        List<GameObject> RoiObject = roiSensor.GetDetected();
+        // turn off the object that is not in ROI
+        foreach(var c in globalWimObj)
+        {
+            if (RoiObject.Contains(c.gameObject) || c.name == "RoiCollider")
+                continue;
+            else
+                c.gameObject.SetActive(false);
+        }
+        LockOnState = false;
+        // Magnify the scale to local wim's size
+        // local wim's size would be auto update at UpdateLocalWimSize()
+        roiSensor.transform.parent = null; // unattach the roiSensor for the size to stay same in world space
+        globalWim.transform.localScale = localWim.transform.localScale;
+        roiSensor.transform.parent = globalWim.transform;
+        UpdateUserPosOnWim();
+    }
+
+    // Public-------------------------------------------------------------------------------
+
+    //public void RoiCenterlize()
+    //{
+    //    localWim.transform.parent = null;
+    //    localWimSpaceCenter.transform.position = localRoi.transform.position;
+    //    localWim.transform.parent = localWimSpaceCenter.transform;
+    //    localWimSpaceCenter.transform.position = LocalWimDefaultPos.transform.position;
+    //}
     /**
      * <summary>
-     * Teleport user to the location that is same on Wim
+     * Update two WIM default position relative to user.
      * </summary>
      */
-    public void TeleportWim(Vector3 destination)     // Not in used
-    {
-        userPosOnLocalWim.transform.position = destination;
-        userPosOnWim.transform.localPosition = userPosOnLocalWim.transform.localPosition;
-        var dis = userPosOnWim.transform.position - globalWimBoundary.position;
-        dis /= wimSize.x;
-        transform.position = worldCenter + dis;
-    }
     public void UpdateDefaultPos()
     {
         var DefaultWimPos = GlobalWimDefaultPos.parent;
@@ -499,7 +549,23 @@ public class Wim : MonoBehaviour
         DefaultWimPos.rotation = Quaternion.LookRotation(projection, Vector3.up);
         DefaultWimPos.position = Cam.transform.position + projection * 0.0f + Vector3.down * 0.01f;
     }
-
+    /**
+     * <summary>
+     * Teleport user to the location that is same on Wim. <br/>
+     * Not in used.
+     * </summary>
+     */
+    public void TeleportWim(Vector3 destination)
+    {
+        WimTeleportPoint.transform.position = destination;
+        WimTPDestination.transform.localPosition = WimTeleportPoint.transform.localPosition;
+        transform.position = WimTPDestination.transform.position;
+        //userPosOnLocalWim.transform.position = destination;
+        //userPosOnWim.transform.localPosition = userPosOnLocalWim.transform.localPosition;
+        //var dis = userPosOnWim.transform.position - globalWimBoundary.position;
+        //dis /= wimSize.x;
+        //transform.position = worldCenter + dis;
+    }
     // Listener
 
     /**

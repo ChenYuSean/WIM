@@ -26,11 +26,6 @@ public class ArrowTrigger : MonoBehaviour
         if (other.gameObject.layer == LayerMask.NameToLayer("Local Wim"))// && other.CompareTag("Selectable"))
         {
             hit = other.gameObject;
-
-            var ArrowDir = gameObject.transform.up;
-            RaycastHit hitInfo;
-            Physics.Raycast(transform.position - 10 * ArrowDir,ArrowDir,out hitInfo,(15 * ArrowDir).magnitude,layerMask);
-            point = hitInfo.point;
         }
             
         if (WimCheck(other))
@@ -60,6 +55,13 @@ public class ArrowTrigger : MonoBehaviour
 
     public Vector3 getCollidingPoint()
     {
+        if(hit != null)
+        {
+            var ArrowDir = gameObject.transform.up;
+            RaycastHit hitInfo;
+            Physics.Raycast(transform.position - 10 * ArrowDir, ArrowDir, out hitInfo, (15 * ArrowDir).magnitude, layerMask);
+            point = hitInfo.point;
+        }
         return point;
     }
 
@@ -67,7 +69,7 @@ public class ArrowTrigger : MonoBehaviour
     {
         if (other.name == "WimBoundary" && other.gameObject.layer == LayerMask.NameToLayer("Global Wim"))
             return true;
-        if (other.name == "RoiCollider" && other.gameObject.layer == LayerMask.NameToLayer("Local Wim"))
+        if (other.name == "RoiCollider" && other.gameObject.layer == LayerMask.NameToLayer("LocalRoi"))
             return true;
         return false;
     }
