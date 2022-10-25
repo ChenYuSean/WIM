@@ -7,12 +7,13 @@ public class ArrowTrigger : MonoBehaviour
     GameObject hit;
     Vector3 point;
     public bool active = false;
-    public delegate void triggerCall(GameObject Controller);
-    public triggerCall OnEnterWim;
-    public triggerCall OnExitWim;
+    public delegate void WimDetect(GameObject Controller, string Type);
+    public WimDetect OnEnterWim;
+    public WimDetect OnExitWim;
 
     private Vector3 ArrowTip;
     private int layerMask;
+    private string wimType = "";
     private void Awake()
     {
         ArrowTip = transform.Find("point").GetComponent<Transform>().position;
@@ -30,7 +31,7 @@ public class ArrowTrigger : MonoBehaviour
             
         if (WimCheck(other))
         {
-            OnEnterWim?.Invoke(this.transform.parent.gameObject);
+            OnEnterWim?.Invoke(this.transform.parent.gameObject,wimType);
         }
     }
 
@@ -44,7 +45,7 @@ public class ArrowTrigger : MonoBehaviour
         SetHighlight(hit, "Touch", false);
         if (WimCheck(other))
         {
-            OnExitWim?.Invoke(this.transform.parent.gameObject);
+            OnExitWim?.Invoke(this.transform.parent.gameObject, wimType);
         }
     }
 
@@ -68,9 +69,15 @@ public class ArrowTrigger : MonoBehaviour
     private bool WimCheck(Collider other)
     {
         if (other.name == "WimBoundary" && other.gameObject.layer == LayerMask.NameToLayer("Global Wim"))
+        {
+            wimType = "global";
             return true;
+        }
         if (other.name == "RoiCollider" && other.gameObject.layer == LayerMask.NameToLayer("LocalRoi"))
+        {
+            wimType = "local";
             return true;
+        }
         return false;
     }
 

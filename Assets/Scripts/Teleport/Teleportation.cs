@@ -3,12 +3,13 @@ using UnityEngine;
 
 public class Teleportation : MonoBehaviour
 {
+    // Assign in Unity's Inspector Panel
     public Camera Cam;
     public GameObject leftController;
     public GameObject rightController;
+    //
     private InputManager IM;
     private ArrowTrigger triggerScript;
-    private Wim wim;
 
     public Material areaVisibleMaterial;
     public Material areaLockedMaterial;
@@ -23,12 +24,31 @@ public class Teleportation : MonoBehaviour
 
     private GameObject user;
     private TpArc tpArc;
-    private bool draw = false;
+    private bool isAbleTP = false;
+    private bool draw = false; // if the arc has been drawn
+    private bool inWim = false; // if controller is in wim
+    private bool changeColor = false; // if arrow has changed the color
 
     public event Action OnEnterTeleportMode; // void Func() delegate delcare and define
     public event Action OnExitTeleportMode;
     public event Action OnTeleport;
 
+    public event Action<Vector3> WimTeleport;
+
+    private void OnEnable()
+    {
+        // adding listener to broadcast
+        ArrowTrigger handCollider;
+        handCollider = rightController.transform.GetComponentInChildren<ArrowTrigger>();
+        handCollider.OnEnterWim += EnteringWim;
+        handCollider.OnExitWim += LeavingWim;
+    }
+
+    private void OnDisable()
+    {
+        triggerScript.OnEnterWim -= EnteringWim;
+        triggerScript.OnExitWim -= LeavingWim;
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -50,7 +70,6 @@ public class Teleportation : MonoBehaviour
         tpPoint = transform.Find("TeleportPoint").gameObject;
         tpPoint.SetActive(false);
         triggerScript = rightController.GetComponentInChildren<ArrowTrigger>();
-        wim = user.GetComponent<Wim>();
         if (IM == null)
             IM = ProjectManager.Instance.getInputManager();
     }
@@ -74,11 +93,13 @@ public class Teleportation : MonoBehaviour
         // draw the point
         if (hitinfo.collider == null)
         {
+            isAbleTP = false;
             tpPoint.SetActive(false);
             tpPoint.transform.position = user.transform.position;
         }
         else
         {
+            isAbleTP = true;
             if (!tpPoint.activeSelf) tpPoint.SetActive(true); // turn on if tpPoint is deacctive
             tpPoint.transform.position = hitinfo.point; //teleport point
         }
@@ -87,43 +108,86 @@ public class Teleportation : MonoBehaviour
 
     private void InputHandler()
     {
-        if(IM.RightHand.Touchpad.axis.magnitude != 0 && draw == false)
-        {   // Draw the arc if user touches the touchpad
-            draw = true;
-            tpArc.Show();
-            OnEnterTeleportMode?.Invoke();
-        }
-        else 
-        if(IM.RightHand.Touchpad.axis.magnitude == 0 && draw == true)
+        if (inWim)
         {
-            // Clear the arc if user leaves
-            draw = false;
-            tpArc.Hide();
-            tpPoint.SetActive(false);
-            OnExitTeleportMode?.Invoke();
-        }
+            if (draw)
+            {
+                // Clear the arc if user untouch the touchpad
+                draw = false;
+                tpArc.Hide();
+                tpPoint.SetActive(false);
+                OnExitTeleportMode?.Invoke();
+            }
 
-        // Teleport Action(Touchpad press)
-        if(IM.RightHand.Touchpad.key.press && draw)
-        {
-            user.transform.position = tpPoint.transform.position;
-            OnTeleport?.Invoke();
-        }
+            if (IM.RightHand.Touchpad.axis.magnitude != 0 && changeColor == false)
+            {
+                changeColor = true;
+                triggerScript.GetComponent<Renderer>().material.SetColor("_Color", Color.cyan);
+            }
+            else if (IM.RightHand.Touchpad.axis.magnitude == 0 && changeColor == true)
+            {
+                changeColor = false;
+                triggerScript.GetComponent<Renderer>().material.SetColor("_Color", Color.yellow);
+            }
 
-        //Teleport with wim
-        if (IM.RightHand.Trigger.press)
+            // Teleport with wim
+            if (IM.RightHand.Touchpad.key.press)
+            {
+                if (triggerScript.getCollidingObject() != null)
+                {
+                    WimTeleport?.Invoke(triggerScript.getCollidingPoint());
+                }
+            }
+        }
+        else
         {
-            LocalWimTeleport();
+            if(changeColor)
+            {
+                changeColor = false;
+                triggerScript.GetComponent<Renderer>().material.SetColor("_Color", Color.yellow);
+            }
+
+            if (IM.RightHand.Touchpad.axis.magnitude != 0 && draw == false)
+            {   // Draw the arc if user touches the touchpad
+                draw = true;
+                tpArc.Show();
+                OnEnterTeleportMode?.Invoke();
+            }
+            else
+            if (IM.RightHand.Touchpad.axis.magnitude == 0 && draw == true)
+            {
+                // Clear the arc if user untouch the touchpad
+                draw = false;
+                tpArc.Hide();
+                tpPoint.SetActive(false);
+                OnExitTeleportMode?.Invoke();
+            }
+
+            // Teleport Action(Touchpad press)
+            if (IM.RightHand.Touchpad.key.press && isAbleTP)
+            {
+                user.transform.position = tpPoint.transform.position;
+                OnTeleport?.Invoke();
+            }
         }
     }
 
-    private void LocalWimTeleport()
+    // Listener
+
+    // Since it assign the function to right hand only, doesn't need to check which hand
+    private void EnteringWim(GameObject Controller,string Type)
     {
-        if (triggerScript.getCollidingObject() != null)
-        {
-            wim.TeleportWim(triggerScript.getCollidingPoint());
-        }
+        if (Type == "local")
+            inWim = true;
+        else
+            return;
     }
 
-    // public
+    private void LeavingWim(GameObject Controller,string Type)
+    {
+        if (Type == "local")
+            inWim = false;
+        else
+            return;
+    }
 }

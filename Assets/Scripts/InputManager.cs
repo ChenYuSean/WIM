@@ -4,8 +4,10 @@ using UnityEngine;
 using Valve.VR;
 
 /**<summary>
- * Get the inputs of controller via SteamVR
- * Can detect Trigger, Grip, Menu and TouchPad
+ * Get the inputs of controller via SteamVR. <br/>
+ * Can detect Trigger, Grip, Menu and TouchPad. <br/>
+ * Use LeftHand or RightHand to get the input. 
+ * </summary>
  */
 public class InputManager : MonoBehaviour
 {
@@ -87,16 +89,6 @@ public class InputManager : MonoBehaviour
         LeftHandInput();
         RightHandInput();
     }
-
-    //public Controller LeftHand()
-    //{
-    //    return left;
-    //}
-
-    //public Controller RightHand()
-    //{
-    //    return right;
-    //}
 
     private void LeftHandInput()
     {

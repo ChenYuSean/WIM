@@ -45,6 +45,7 @@ public class Wim : MonoBehaviour
 
     public bool RoiLockOn = false;
     private bool LockOnState = true;
+    private bool isUserInROI = false;
 
     private Collider[] globalWimObj;
     void Start()
@@ -72,7 +73,8 @@ public class Wim : MonoBehaviour
     private void OnEnable()
     {
         var tpscript = GetComponentInChildren<Teleportation>();
-        tpscript.OnTeleport += WimPosAtTeleport;
+        tpscript.OnTeleport += WimPosOnTeleport;
+        tpscript.WimTeleport += TeleportInWim;
         if(!(roiSensor is null))
         {
             roiSensor.OnEnterRoi += EnterRoi;
@@ -82,16 +84,15 @@ public class Wim : MonoBehaviour
     private void OnDisable()
     {
         var tpscript = GetComponentInChildren<Teleportation>();
-        tpscript.OnTeleport -= WimPosAtTeleport;
+        tpscript.OnTeleport -= WimPosOnTeleport;
+        tpscript.WimTeleport -= TeleportInWim;
         roiSensor.OnEnterRoi -= EnterRoi;
         roiSensor.OnExitRoi -= ExitRoi;
     }
     // Belowed functions called on Start
-    /**
-     * <summary>
-     * Initiate the variable
-     * </summary>
-     */
+    /// <summary>
+    /// Initiate the variable
+    /// </summary>
     void InitEnv()
     {
         world = GameObject.Find("World");
@@ -106,11 +107,9 @@ public class Wim : MonoBehaviour
         IM = ProjectManager.Instance.getInputManager();
     }
 
-    /**
-     * <summary>
-     * Create global and local wim. Turn on the <see cref="RoiGrab"/> and <see cref="TriggerSensor"/> on Global Roi.
-     * </summary>
-     */
+    /// <summary>
+    /// Create global and local wim. Turn on the <see cref="RoiGrab"/> and <see cref="TriggerSensor"/> on Global Roi.
+    /// </summary>
     void CreateWim()
     {
         // create global wim
@@ -161,11 +160,9 @@ public class Wim : MonoBehaviour
         worldRoi.GetComponentInChildren<MeshRenderer>().enabled = true;
     }
 
-    /**
-     * <summary>
-     * Generate dummy object to track local position in local and global.
-     * </summary>
-     */
+    /// <summary>
+    /// Generate dummy object to track local position in local and global.
+    /// </summary>
     void InitDummyTracking()
     {
         trackingRoiinLocal = new GameObject("Tracking Roi in Local");
@@ -183,11 +180,9 @@ public class Wim : MonoBehaviour
         //globalWimSpaceCenter = new GameObject("Global Wim Space Center");
     }
 
-    /**
-     * <summary>
-     * Create a red ball indicate the user on Wim
-     * </summary>
-     */
+     /// <summary>
+     /// Create a red ball indicate the user on Wim
+     /// </summary>
     private void InitUserTracking()
     {
         // global
@@ -213,11 +208,10 @@ public class Wim : MonoBehaviour
         userPosOnLocalWim.GetComponent<ObjectParentChildInfo>().parent = userPosOnWim;
     }
 
-    /**
-     * <summary>
-     * Set the layer to the object and its child recursively.
-     * </summary>
-     */
+
+    /// <summary>
+    /// Set the layer to the object and its child recursively.
+    /// </summary>
     void SetWimObjLayer(GameObject obj, int newLayer)
     {
         if (null == obj)
@@ -236,11 +230,9 @@ public class Wim : MonoBehaviour
             SetWimObjLayer(child.gameObject, newLayer);
         }
     }
-    /**
-     * <summary>
-     * Set the tag to the object and its child recursively.
-     * </summary>
-     */
+    /// <summary>
+    /// Set the tag to the object and its child recursively.
+    /// </summary>
     void SetWimObjTag(GameObject obj, string tag)
     {
         if (null == obj)
@@ -259,12 +251,10 @@ public class Wim : MonoBehaviour
             SetWimObjTag(child.gameObject, tag);
         }
     }
-    /**
-     * <summary>
-     * Binding the local and global object in wim.<br/>
-     * <see cref="SaveWimObjInBuffer"/> and <see cref="BindingObjByBuffer"/> are subfuction where used. 
-     * </summary>
-     */
+    /// <summary>
+    /// Binding the local and global object in wim.<br/>
+    /// <see cref="SaveWimObjInBuffer"/> and <see cref="BindingObjByBuffer"/> are subfuction where used. 
+    /// </summary>
     private void BindingWim()
     {
         wimObjectBuffer = new List<GameObject>();
@@ -364,11 +354,9 @@ public class Wim : MonoBehaviour
         }
     }
 
-    /**
-     * <summary>
-     * Deactivate the object in local wim
-     * </summary>
-     */
+    /// <summary>
+    /// Deactivate the object in local wim
+    /// </summary>
     private void HideLocalWim()
     {
         Collider[] cs = localWim.GetComponentsInChildren<Collider>();
@@ -380,11 +368,9 @@ public class Wim : MonoBehaviour
         }
     }
 
-    /**
-     * <summary>
-     * Correct the position in the startup, Camera will correct after one second.
-     * </summary> 
-     */
+    /// <summary>
+    /// Correct the position in the startup, Camera will correct after one second.
+    /// </summary> 
     private IEnumerator PosCalibrate()
     {
         yield return new WaitForSeconds(1.0f);
@@ -486,16 +472,16 @@ public class Wim : MonoBehaviour
     {
         if (IM.RightHand.Menu.press)
             UpdateDefaultPos();
-        if (IM.LeftHand.Touchpad.down.press)
-            ZoomInGlobal();
+        //if (IM.LeftHand.Touchpad.down.press)
+        //    ZoomInGlobal();
     }
 
-    /** <summary>
-     *  Let user turn on lock on mode for Roi following user when teleporting. <br/>
-     *  Default is ON.
-     *  Not in used.
-     *  </summary>
-     */
+
+    /* NOT IN USED
+    /// <summary>
+    /// Let user turn on lock on mode for Roi following user when teleporting. <br/>
+    /// Default is ON.
+    /// </summary>
     private void ToggleRoiLockOn()
     {
         LockOnState = !LockOnState; // can only be toggle by this function
@@ -505,8 +491,10 @@ public class Wim : MonoBehaviour
         if(RoiLockOn)
             roiSensor.gameObject.transform.position = userPosOnWim.transform.position;
     }
+    */
 
-    private void ZoomInGlobal()
+    /* NOT IN USED
+    private void ZoomInGlobal() // NOT IN USED
     {
         if (globalWim.transform.localScale.magnitude > 0.5)
             return;
@@ -527,21 +515,22 @@ public class Wim : MonoBehaviour
         roiSensor.transform.parent = globalWim.transform;
         UpdateUserPosOnWim();
     }
-
+    */
     // Public-------------------------------------------------------------------------------
 
-    //public void RoiCenterlize()
-    //{
-    //    localWim.transform.parent = null;
-    //    localWimSpaceCenter.transform.position = localRoi.transform.position;
-    //    localWim.transform.parent = localWimSpaceCenter.transform;
-    //    localWimSpaceCenter.transform.position = LocalWimDefaultPos.transform.position;
-    //}
-    /**
-     * <summary>
-     * Update two WIM default position relative to user.
-     * </summary>
-     */
+    /* NOT IN USED
+    public void RoiCenterlize()
+    {
+        localWim.transform.parent = null;
+        localWimSpaceCenter.transform.position = localRoi.transform.position;
+        localWim.transform.parent = localWimSpaceCenter.transform;
+        localWimSpaceCenter.transform.position = LocalWimDefaultPos.transform.position;
+    }
+    */
+
+    /// <summary>
+    /// Update two WIM default position relative to user.
+    /// </summary>
     public void UpdateDefaultPos()
     {
         var DefaultWimPos = GlobalWimDefaultPos.parent;
@@ -549,33 +538,20 @@ public class Wim : MonoBehaviour
         DefaultWimPos.rotation = Quaternion.LookRotation(projection, Vector3.up);
         DefaultWimPos.position = Cam.transform.position + projection * 0.0f + Vector3.down * 0.01f;
     }
-    /**
-     * <summary>
-     * Teleport user to the location that is same on Wim. <br/>
-     * Not in used.
-     * </summary>
-     */
-    public void TeleportWim(Vector3 destination)
-    {
-        WimTeleportPoint.transform.position = destination;
-        WimTPDestination.transform.localPosition = WimTeleportPoint.transform.localPosition;
-        transform.position = WimTPDestination.transform.position;
-        //userPosOnLocalWim.transform.position = destination;
-        //userPosOnWim.transform.localPosition = userPosOnLocalWim.transform.localPosition;
-        //var dis = userPosOnWim.transform.position - globalWimBoundary.position;
-        //dis /= wimSize.x;
-        //transform.position = worldCenter + dis;
-    }
+
     // Listener
 
-    /**
-     * <summary>
-     * Activate the object in local if the global one is entering the roi 
-     * Also highlight the global replica
-     * </summary>
-     */
+    /// <summary>
+    /// Activate the object in local if the global one is entering the roi 
+    /// Also highlight the global replica
+    /// </summary>
     private void EnterRoi(Collider other)
     {
+        if (GameObject.ReferenceEquals(other.gameObject, userPosOnWim))
+        {
+            isUserInROI = true;
+        }
+
         ObjectParentChildInfo o = other.GetComponent<ObjectParentChildInfo>();
         if (o != null && o.child != null)
         {
@@ -589,17 +565,17 @@ public class Wim : MonoBehaviour
             highlight.highlighted = true;
         }
     }
-    /**
-     * <summary>
-     * Deactivate the object in local if the global one is exiting the roi
-     * </summary>
-     */
+
+    /// <summary>
+    /// Deactivate the object in local if the global one is exiting the roi
+    /// </summary>
     private void ExitRoi(Collider other)
     {
-        if (RoiLockOn || GameObject.ReferenceEquals(other, userPosOnWim))
-        {
+        // Roi follows the the user if RoiLockOn is ON
+        if (RoiLockOn && GameObject.ReferenceEquals(other.gameObject, userPosOnWim))
             roiSensor.gameObject.transform.position = userPosOnWim.transform.position;
-        }
+        else if (GameObject.ReferenceEquals(other.gameObject, userPosOnWim))
+            isUserInROI = false;
 
         ObjectParentChildInfo o = other.GetComponent<ObjectParentChildInfo>();
         if (o != null && o.child != null)
@@ -615,11 +591,26 @@ public class Wim : MonoBehaviour
 
     }
 
-    private void WimPosAtTeleport()
+    /// <summary>
+    /// Teleport user to the location that is same on Wim. <br/>
+    /// </summary>
+    private void TeleportInWim(Vector3 destination)
+    {
+        WimTeleportPoint.transform.position = destination;
+        WimTPDestination.transform.localPosition = WimTeleportPoint.transform.localPosition;
+        transform.position = WimTPDestination.transform.position;
+    }
+
+    /// <summary>
+    /// Move the Wim position after user teleports, and move the ROI to user position
+    /// </summary>
+    private void WimPosOnTeleport()
     {
         UpdateDefaultPos();
-        RoiLockOn = LockOnState;
-        if (RoiLockOn)
+        // RoiLockOn would be turn off by grabing ROI in global wim
+        // Turn back to the original state before grabing
+        RoiLockOn = LockOnState; 
+        if (RoiLockOn && !isUserInROI)
             roiSensor.gameObject.transform.position = userPosOnWim.transform.position;
     }
 }

@@ -78,11 +78,9 @@ public class UserSelection : MonoBehaviour
     }
 
     // Belowed functions called on Start
-    /**
-     * <summary>
-     * Initiate the variables
-     * </summary>
-     */
+    /// <summary>
+    /// Initiate the variables
+    /// </summary>
     private void InitEnv()
     {
         BubbleDiskL = leftController.transform.Find("Bubble").gameObject;
@@ -96,11 +94,9 @@ public class UserSelection : MonoBehaviour
         triggerScriptR.active = true;
     }
 
-    /**
-     * <summary>
-     * Construct the line drawer of drawing ray
-     * </summary>
-     */
+    /// <summary>
+    /// Construct the line drawer of drawing ray
+    /// </summary>
     private void InitLineDrawer()
     {
         leftRay = new Linedrawer();
@@ -120,11 +116,9 @@ public class UserSelection : MonoBehaviour
     }
 
 
-    /**
-     * <summary>
-     * Draw the ray in Scene
-     * </summary>
-     */
+    /// <summary>
+    /// Draw the ray in Scene
+    /// </summary>
     private void DrawLine()
     {
         if(leftDraw)
@@ -139,11 +133,9 @@ public class UserSelection : MonoBehaviour
         }
     }
 
-    /**
-     * <summary>
-     * Select the object by ray. The Bubble Mechanism is used.
-     * </summary>
-     */
+    /// <summary>
+    /// Select the object by ray. The Bubble Mechanism is used.
+    /// </summary>
     private void RayCasting()
     { 
         Casting(IM.LeftHand,RayOriginL, RayDirectionL, RayLengthL, leftDraw);
@@ -184,11 +176,10 @@ public class UserSelection : MonoBehaviour
         if (preSelected != SelectedObj)
             SetHighlight(preSelected, "Touch", false);
     }
-    /**
-     * <summary>
-     * Turn on or off the line drawer. Also clear the line in scene when turn off.
-     * </summary>
-     */
+
+    /// <summary>
+    /// Turn on or off the line drawer. Also clear the line in scene when turn off.
+    /// </summary>
     private void ToggleDraw(bool isRight,bool OnOff)
     {
         if (isRight)
@@ -219,13 +210,11 @@ public class UserSelection : MonoBehaviour
         }
     }
 
-    /**
-     * <summary>
-     * Bubble Mechanism is used for selected the closest object to the ray.Has the 5 degree of tolerance between ray and target.<br/> 
-     * <paramref name="isRight"/> determined the ray is casted at right or left.
-     * </summary>
-     * <param name="isRight"> True if casting from right hand, otherwise it's casting from left hand.</param>
-     */
+    /// <summary>
+    /// Bubble Mechanism is used for selected the closest object to the ray.Has the 5 degree of tolerance between ray and target.<br/> 
+    /// <paramref name="isRight"/> determined the ray is casted at right or left.
+    /// </summary>
+    /// <param name="isRight"> True if casting from right hand, otherwise it's casting from left hand.</param>
     GameObject BubbleMechanism(bool isRight,int layermask)
     {
         float bubbleSize = 0.01f ;
@@ -333,11 +322,9 @@ public class UserSelection : MonoBehaviour
         return nearestObj;
     }
 
-    /**
-     * <summary>
-     * calculate the distance betweem object and the ray. Using origin and direction to determine the ray.
-     * </summary>
-     */
+    /// <summary>
+    /// calculate the distance betweem object and the ray. Using origin and direction to determine the ray.
+    /// </summary>
     float DisPoint2Line(Collider obj, Vector3 ori, Vector3 dir)
     {
         Vector3 point = obj.transform.position;
@@ -349,11 +336,9 @@ public class UserSelection : MonoBehaviour
         return trueDis;
     }
 
-    /**
-     * <summary>
-     * Select the target in NearField by Arrow
-     * </summary>
-     */
+    /// <summary>
+    /// Select the target in NearField by Arrow
+    /// </summary> 
     private void NearFieldSelection()
     {
         // Left
@@ -414,9 +399,8 @@ public class UserSelection : MonoBehaviour
         if (drawFlag < -1)
             drawFlag = -1;
     }
-    private void EnteringWim(GameObject Controller)
+    private void EnteringWim(GameObject Controller,string Type)
     {
-        //Debug.Log(Controller.name + "is entering wim");
         if (GameObject.ReferenceEquals(Controller, leftController))
             ToggleDraw(false, false);
         else if (GameObject.ReferenceEquals(Controller, rightController))
@@ -426,9 +410,8 @@ public class UserSelection : MonoBehaviour
         }
     }   
 
-    private void LeavingWim(GameObject Controller)
+    private void LeavingWim(GameObject Controller,string Type)
     {
-        //Debug.Log(Controller.name + " is leaving wim");
         if (GameObject.ReferenceEquals(Controller, leftController))
             ToggleDraw(false, true);
         else if (GameObject.ReferenceEquals(Controller, rightController))
