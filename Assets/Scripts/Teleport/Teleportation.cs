@@ -71,7 +71,7 @@ public class Teleportation : MonoBehaviour
         tpPoint.SetActive(false);
         triggerScript = rightController.GetComponentInChildren<ArrowTrigger>();
         if (IM == null)
-            IM = ProjectManager.Instance.getInputManager();
+            IM = GameManager.Instance.getInputManager();
     }
 
     private void InitSettings()

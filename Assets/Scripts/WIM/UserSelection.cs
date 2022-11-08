@@ -60,7 +60,7 @@ public class UserSelection : MonoBehaviour
         handCollider.OnEnterWim += EnteringWim;
         handCollider.OnExitWim += LeavingWim;
 
-        Teleportation tpScript = ProjectManager.Instance.getCameraRig().GetComponentInChildren<Teleportation>();
+        Teleportation tpScript = GameManager.Instance.getCameraRig().GetComponentInChildren<Teleportation>();
         tpScript.OnEnterTeleportMode += TpModeEnter;
         tpScript.OnExitTeleportMode += TpModeExit;
     }
@@ -72,7 +72,7 @@ public class UserSelection : MonoBehaviour
         triggerScriptL.OnExitWim -= LeavingWim;
         triggerScriptR.OnEnterWim -= EnteringWim;
         triggerScriptR.OnExitWim -= LeavingWim;
-        Teleportation tpScript = ProjectManager.Instance.getCameraRig().GetComponentInChildren<Teleportation>();
+        Teleportation tpScript = GameManager.Instance.getCameraRig().GetComponentInChildren<Teleportation>();
         tpScript.OnEnterTeleportMode -= TpModeEnter;
         tpScript.OnExitTeleportMode -= TpModeExit;
     }
@@ -87,7 +87,7 @@ public class UserSelection : MonoBehaviour
         BubbleDiskR = rightController.transform.Find("Bubble").gameObject;
         BubbleDiskL.SetActive(false);
         BubbleDiskR.SetActive(false);
-        IM = ProjectManager.Instance.getInputManager();
+        IM = GameManager.Instance.getInputManager();
         triggerScriptL = leftController.GetComponentInChildren<ArrowTrigger>();
         triggerScriptR = rightController.GetComponentInChildren<ArrowTrigger>();
         triggerScriptL.active = true;

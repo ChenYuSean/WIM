@@ -104,7 +104,7 @@ public class Wim : MonoBehaviour
         localWimLayer = LayerMask.NameToLayer("Local Wim");
         worldCenter = world.transform.Find("WimBoundary").GetComponent<BoxCollider>().bounds.center;
         worldRoi = world.transform.Find("ROI").gameObject;
-        IM = ProjectManager.Instance.getInputManager();
+        IM = GameManager.Instance.getInputManager();
     }
 
     /// <summary>
@@ -494,7 +494,7 @@ public class Wim : MonoBehaviour
     */
 
     /* NOT IN USED
-    private void ZoomInGlobal() // NOT IN USED
+    private void ZoomInGlobal()
     {
         if (globalWim.transform.localScale.magnitude > 0.5)
             return;
