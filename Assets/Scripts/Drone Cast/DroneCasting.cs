@@ -123,14 +123,13 @@ public class DroneCasting : MonoBehaviour
             IM = GameManager.Instance.getInputManager();
 
         AxisState = RotationAxis.GetComponent<AxisState>();
-        LineDrawerR = new Linedrawer();
-        LineDrawerL = new Linedrawer();
+        LineDrawerL = GetComponent<OperationManager>().leftRay;
+        LineDrawerR = GetComponent<OperationManager>().rightRay;
         Context = new List<GameObject>();
         ContextInPersonal = new List<GameObject>();
         //STEPshower = ShowSTEP(5);
         //StartCoroutine(STEPshower);
         RotationAxis.SetActive(false);
-        RightHandArrow.SetActive(false);
         RayEndR.SetActive(false);
         RayEndL.SetActive(false);
         NearFieldSphere.SetActive(false);
@@ -198,6 +197,7 @@ public class DroneCasting : MonoBehaviour
                     Cone.GetComponent<ConeScript>().setAngle(ScanningAngle);
                     Cone.transform.position = Drone.transform.position;
                     Cone.transform.rotation = Drone.transform.rotation;
+                    Drone.SetActive(true);
                     Cone.SetActive(true);
                     LineDrawerR.DrawLineInGameView(RayOriginR, RayOriginR, Color.red);
 
@@ -231,12 +231,12 @@ public class DroneCasting : MonoBehaviour
             if (IM.RightHand.Grip.press)
             {
                 //turn of visibility
+                Drone.SetActive(false);
                 Cone.SetActive(false);
                 NearFieldSphere.SetActive(false);
                 BubbleDiskL.SetActive(false);
                 LineDrawerL.DrawLineInGameView(Vector3.zero, Vector3.zero, Color.red);
                 CleanUpContext();
-
                 GameManager.Instance.SetCurStep(STEP.dflt);
                 return;
             }
@@ -333,7 +333,6 @@ public class DroneCasting : MonoBehaviour
                 CleanUpContext();
                 RotationAxis.GetComponent<AxisState>().replicaTouchCount = 0;
                 RotationAxis.SetActive(false);
-                RightHandArrow.SetActive(false);
                 RotationAxis.transform.localScale = oriLocalScale;
                 Enlarge = false;
                 LineDrawerR.DrawLineInGameView(Vector3.zero, Vector3.zero, Color.red);
@@ -546,13 +545,6 @@ public class DroneCasting : MonoBehaviour
     private void CompleteSelection()
     {
         STEP NowSTEP = GameManager.Instance.GetCurStep();
-        if (SelectedObj != null && SelectedObj.CompareTag("Targets"))
-        {
-            SelectedObj.layer = 9;
-        }
-        else
-        {
-        }
         SelectedObj = null;
     }
     /**
@@ -1030,6 +1022,16 @@ public class DroneCasting : MonoBehaviour
             layerMask ^= 1 << LayerMask.NameToLayer("NearFieldObjects");
         }
         return layerMask;
+    }
+
+    public GameObject getCastingUtil()
+    {
+        return CastingUtil;
+    }
+
+    public GameObject getDroneScanner()
+    {
+        return DroneScanner;
     }
 }
 

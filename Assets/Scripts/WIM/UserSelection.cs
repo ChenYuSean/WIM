@@ -99,8 +99,8 @@ public class UserSelection : MonoBehaviour
     /// </summary>
     private void InitLineDrawer()
     {
-        leftRay = new Linedrawer();
-        rightRay = new Linedrawer();
+        leftRay = GetComponent<OperationManager>().leftRay;
+        rightRay = GetComponent<OperationManager>().rightRay;
         leftDraw = true;
         rightDraw = true;
     }

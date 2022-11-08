@@ -30,6 +30,10 @@ public class GameManager : MonoBehaviour
         }
         DontDestroyOnLoad(Instance);
     }
+    private void Start()
+    {
+        mHybridSelectionState = new HybridSelectionState();
+    }
 
     public AudioClip[] getAudioClips()
     {
