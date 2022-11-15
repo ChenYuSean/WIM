@@ -18,14 +18,14 @@ TagManager:
   - 
   - 
   - CollisionDetect
-  - UnchangeableObjects
+  - 
   - Background
   - SelectableBackground
   - Local Wim
   - Global Wim
-  - LocalRoi
+  - Local Roi
   - NearFieldObjects
-  - 
+  - UnchangeableObjects
   - 
   - 
   - 

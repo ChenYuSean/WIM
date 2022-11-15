@@ -14,10 +14,9 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private GameObject CameraRig;
     [SerializeField]
-    private InputManager InputMgr;
-    [SerializeField]
     private AudioManager AudioMgr;
 
+    private InputManager InputMgr;
     private HybridSelectionState mHybridSelectionState;
     void Awake()
     {
@@ -29,6 +28,8 @@ public class GameManager : MonoBehaviour
             return;
         }
         DontDestroyOnLoad(Instance);
+
+        InputMgr = GetComponent<InputManager>();
     }
     private void Start()
     {
@@ -54,6 +55,8 @@ public class GameManager : MonoBehaviour
     {
         return AudioMgr;
     }
+
+
 
     public STEP GetCurStep()
     {

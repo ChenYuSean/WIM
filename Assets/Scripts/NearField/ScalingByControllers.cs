@@ -5,8 +5,8 @@ using Valve.VR;
 
 public class ScalingByControllers : MonoBehaviour
 {
-    public GameObject controllerRight;
-    public GameObject controllerLeft;
+    public GameObject rightController;
+    public GameObject leftController;
 
     private float originalDistance;
 
@@ -58,19 +58,19 @@ public class ScalingByControllers : MonoBehaviour
                 state.scaling = true;
                 originalScaling = transform.localScale;
                 CamPosThen = Cam.transform.position;
-                originalDistance = Vector3.Distance(controllerLeft.transform.position,controllerRight.transform.position);
+                originalDistance = Vector3.Distance(leftController.transform.position,rightController.transform.position);
                 DistanceBetweenCubeAndRotationAxis = Vector3.Distance(smallCube.transform.position, this.transform.position);
                 scaleXLastFrame = originalScaling.x;
             }
             if(state.scaling)
             {
-                transform.localScale = originalScaling * Vector3.Distance(controllerLeft.transform.position, controllerRight.transform.position) / originalDistance;
+                transform.localScale = originalScaling * Vector3.Distance(leftController.transform.position, rightController.transform.position) / originalDistance;
             }
         }else
         {
             state.scaling = false;
         }
-        if (Vector3.Angle(controllerLeft.transform.forward,Vector3.up) < 60 && Vector3.Angle(controllerRight.transform.forward, Vector3.up) < 60)
+        if (Vector3.Angle(leftController.transform.forward,Vector3.up) < 60 && Vector3.Angle(rightController.transform.forward, Vector3.up) < 60)
         {
             state.scaleReady = true;
         }else

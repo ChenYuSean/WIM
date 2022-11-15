@@ -20,8 +20,6 @@ public class OperationManager : MonoBehaviour
     private DroneCasting droneScript;
     private UserSelection selectionScript;
     private Teleportation tpScript;
-    private GameObject CastingUtil;
-    private GameObject DroneScanner;
     Mode currentMode = Mode.Global;
     private enum Mode {Global, Local}
 
@@ -38,8 +36,6 @@ public class OperationManager : MonoBehaviour
     {
         if (IM == null)
             IM = GameManager.Instance.getInputManager();
-        CastingUtil = droneScript.getCastingUtil();
-        DroneScanner = droneScript.getDroneScanner();
         LeavingMode(Mode.Local);
         EnteringMode(Mode.Global);
     }
@@ -80,8 +76,6 @@ public class OperationManager : MonoBehaviour
                 break;
             case Mode.Local:
                 droneScript.enabled = false;
-                CastingUtil.SetActive(false);
-                DroneScanner.SetActive(false);
                 break;
         }
     }
@@ -97,8 +91,6 @@ public class OperationManager : MonoBehaviour
                 break;
             case Mode.Local:
                 droneScript.enabled = true;
-                CastingUtil.SetActive(true);
-                DroneScanner.SetActive(true);
                 break;
         }
     }

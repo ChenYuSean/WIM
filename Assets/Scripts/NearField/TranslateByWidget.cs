@@ -11,8 +11,8 @@ public class TranslateByWidget : MonoBehaviour
     private DetectSphereTouch InnerSphere;
     private AxisState state;
 
-    public GameObject controllerRight;
-    public GameObject controllerLeft;
+    public GameObject rightController;
+    public GameObject leftController;
 
     private bool touching;
 
@@ -49,7 +49,7 @@ public class TranslateByWidget : MonoBehaviour
         {
             myHighlight.ProfileLoad(SphereGrab);
             myHighlight.highlighted = true;
-            mParentsParent.transform.parent = whichhand ? controllerRight.transform : controllerLeft.transform;
+            mParentsParent.transform.parent = whichhand ? rightController.transform : leftController.transform;
         } else
         if (touching && InnerSphere.touched == false && state.rotating == false && state.scaling == false && state.replicaTouched == false)
         {

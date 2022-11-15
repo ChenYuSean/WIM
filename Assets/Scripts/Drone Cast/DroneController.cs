@@ -24,8 +24,8 @@ using HighlightPlus;
 public class DroneController : MonoBehaviour
 {
 
-    public GameObject controllerRight;
-    public GameObject controllerLeft;
+    public GameObject rightController;
+    public GameObject leftController;
 
     public Camera Cam;
 
@@ -53,7 +53,7 @@ public class DroneController : MonoBehaviour
 
         if (NOWSTEP != STEP.One) return;
 
-        gameObject.transform.rotation = controllerRight.transform.rotation;
+        gameObject.transform.rotation = rightController.transform.rotation;
         if (IM.RightHand.Trigger.hold)
             HomerControl();
         else
@@ -73,14 +73,14 @@ public class DroneController : MonoBehaviour
     {
         if (firstTrigger == false)
             HomerInitialize();
-        Vector3 handTranslate = controllerRight.transform.position - lastControllerPosition;
+        Vector3 handTranslate = rightController.transform.position - lastControllerPosition;
         float velocity = handTranslate.magnitude;
         float VelocityScale = velocity / ScaleConstant;
         VelocityScale = VelocityScale <= VelocityScale_Deadzone ? 0f : (VelocityScale >= 1.2f ? 1.2f : VelocityScale);
         Vector3 DroneTranslate = handTranslate * DistanceScale * VelocityScale;
         gameObject.transform.position = gameObject.transform.position + DroneTranslate;
 
-        lastControllerPosition = controllerRight.transform.position;
+        lastControllerPosition = rightController.transform.position;
     }
 
     /**
@@ -91,9 +91,9 @@ public class DroneController : MonoBehaviour
     private void HomerInitialize()
     {
         firstTrigger = true;
-        lastControllerPosition = controllerRight.transform.position;
+        lastControllerPosition = rightController.transform.position;
         // hand initial position
-        var diff = controllerRight.transform.position - Cam.transform.position;
+        var diff = rightController.transform.position - Cam.transform.position;
         diff.y = 0;
         float initHandDistance = diff.magnitude;
         // drone initial position

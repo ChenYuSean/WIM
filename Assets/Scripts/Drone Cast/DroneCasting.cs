@@ -17,8 +17,8 @@ using HighlightPlus;
 public class DroneCasting : MonoBehaviour
 {
 
-    public GameObject controllerRight;
-    public GameObject controllerLeft;
+    public GameObject rightController;
+    public GameObject leftController;
     public Camera Cam;
     public InputManager IM;
     public GameObject DroneScanner;
@@ -50,8 +50,9 @@ public class DroneCasting : MonoBehaviour
     private GameObject BubbleObjR;
     private GameObject BubbleObjL;
 
-    Linedrawer LineDrawerR;
     Linedrawer LineDrawerL;
+    Linedrawer LineDrawerR;
+
 
     private GameObject ReplicaParent;
     private GameObject NearFieldSphere;
@@ -90,11 +91,25 @@ public class DroneCasting : MonoBehaviour
     private int DepthResetCounter = 0;
     private int AngleResetCounter = 0;
 
+    private void OnEnable()
+    {
+        if(CastingUtil != null)
+            CastingUtil.SetActive(true);
+        if(DroneScanner != null)
+            DroneScanner.SetActive(true);
+    }
+
+    private void OnDisable()
+    {
+        CastingUtil.SetActive(false);
+        DroneScanner.SetActive(false);
+    }
 
     void Awake()
     {
-        controllerLeft = (controllerLeft == null) ? GameObject.Find("Controller (left)") : controllerLeft;
-        controllerRight = (controllerRight == null) ? GameObject.Find("Controller (right)") : controllerRight;
+        leftController = (leftController == null) ? GameObject.Find("Controller (left)") : leftController;
+        rightController = (rightController == null) ? GameObject.Find("Controller (right)") : rightController;
+        if (GameObject.ReferenceEquals(leftController, rightController)) throw new System.Exception("Controller Assignment Invalid");
         // Casting Utility GameObject
         NearFieldSphere = CastingUtil.transform.Find("NearFieldSphere").gameObject;
         BubbleDiskR = CastingUtil.transform.Find("Bubble").gameObject;
@@ -103,7 +118,7 @@ public class DroneCasting : MonoBehaviour
         RayEndL = CastingUtil.transform.Find("RayEndPointL").gameObject;
         // Drone Scanner GameObject
         Drone = DroneScanner.transform.Find("Drone").gameObject;
-        Cone = DroneScanner.transform.Find("ScanningCone").gameObject;
+        Cone = Drone.transform.Find("ScanningCone").gameObject;
         // Create ReplicaParent
         ReplicaParent = GameObject.Find("ReplicaParent");
         if (ReplicaParent is null)
@@ -111,14 +126,11 @@ public class DroneCasting : MonoBehaviour
         // initalize variable
         ScanningAngle = DefaultAngle;
         ScanningDepth = DefaultDepth;
-
-        CastingUtil.SetActive(false);
-        DroneScanner.SetActive(false);
     }
 
     void Start()
     {
-        Drone.gameObject.SetActive(true);
+
         if (IM == null)
             IM = GameManager.Instance.getInputManager();
 
@@ -127,8 +139,6 @@ public class DroneCasting : MonoBehaviour
         LineDrawerR = GetComponent<OperationManager>().rightRay;
         Context = new List<GameObject>();
         ContextInPersonal = new List<GameObject>();
-        //STEPshower = ShowSTEP(5);
-        //StartCoroutine(STEPshower);
         RotationAxis.SetActive(false);
         RayEndR.SetActive(false);
         RayEndL.SetActive(false);
@@ -160,18 +170,18 @@ public class DroneCasting : MonoBehaviour
     private void FlowControl()
     {
         STEP NOWSTEP = GameManager.Instance.GetCurStep();
-        int layerMask = FromStepToLayerMask(NOWSTEP);
 
         RaycastHit rhit;
         RaycastHit lhit;
 
-        RayOriginR = controllerRight.transform.position;
-        RayDirectionR = controllerRight.transform.forward;
-        RayOriginL = controllerLeft.transform.position;
-        RayDirectionL = controllerLeft.transform.forward;
+        RayOriginR = rightController.transform.position;
+        RayDirectionR = rightController.transform.forward;
+        RayOriginL = leftController.transform.position;
+        RayDirectionL = leftController.transform.forward;
 
         if (NOWSTEP == STEP.dflt)
         {
+            int layerMask = LayerMask.GetMask("SelectableBackground");
             RayLengthR = 100.0f;
             RayLengthL = 0.0f;
             if (Physics.Raycast(RayOriginR, RayDirectionR, out rhit, RayLengthR, layerMask))
@@ -242,11 +252,10 @@ public class DroneCasting : MonoBehaviour
             }
 
             // Step One execution
+            int layerMask = LayerMask.GetMask("NearFieldObjects");
             RayLengthR = 100.0f;
             RayLengthL = 0.5f * NearFieldSphere.transform.localScale.x / 0.4f;
-
-            AdjustScanningArea(layerMask);
-
+           
             RayEndR.SetActive(false);
             BubbleDiskR.SetActive(false);
 
@@ -296,8 +305,10 @@ public class DroneCasting : MonoBehaviour
             // Draw Ray
             LineDrawerL.DrawLineInGameView(RayOriginL, RayDestinationL, Color.red);
 
-            // Function in STEP one
-            DroneScanning(layerMask);
+            // Drone
+            AdjustScanningArea();
+            LayerMask droneLayerMask = LayerMask.GetMask("SelectableBackground");
+            DroneScanning(droneLayerMask);
 
             Cone.transform.position = Drone.transform.position;
             Cone.transform.rotation = Drone.transform.rotation;
@@ -347,6 +358,7 @@ public class DroneCasting : MonoBehaviour
                 RayLengthR = 0;
                 RayLengthL = 0;
             }
+            int layerMask = LayerMask.GetMask("NearFieldObjects");
             // Right Hand Ray
             if (Physics.Raycast(RayOriginR, RayDirectionR, out rhit, RayLengthR, layerMask))
             {
@@ -479,10 +491,10 @@ public class DroneCasting : MonoBehaviour
     
     /**
     * <summary>
-    * Function for adjusting the scanning radius of drone.LayerMask is used for smart-adjusting depth.
+    * Function for adjusting the scanning radius of drone.
     * </summary>
     */
-    private void AdjustScanningArea(LayerMask layerMask)
+    private void AdjustScanningArea()
     {
         const int counter_reset = 50;
         bool isXAxisHold =  IM.LeftHand.Touchpad.left.hold ||IM.LeftHand.Touchpad.right.hold ? true : false ;  
@@ -776,11 +788,6 @@ public class DroneCasting : MonoBehaviour
         float distance = 0;
         while (i < coveredTargets.Length)
         {
-            //if (coveredTargets[i].name == "MainSphere" || coveredTargets[i].tag == "NoCopy" || coveredTargets[i].tag == "Floor")
-            //{
-            //    i++;
-            //    continue;
-            //}
             sum += coveredTargets[i].transform.position - center;
             i++;
         }
@@ -788,21 +795,17 @@ public class DroneCasting : MonoBehaviour
         i = 0;
         while (i < coveredTargets.Length)
         {
-            //if (coveredTargets[i].name == "MainSphere" || coveredTargets[i].tag == "NoCopy" || coveredTargets[i].tag == "Floor")
-            //{
-            //    i++;
-            //    continue;
-            //}
             // realdis represents the offset relative to the center of the casting sphere
             realdis[i] = coveredTargets[i].transform.position - objCenter;
-            Ray ray = new Ray(objCenter + 100 * (coveredTargets[i].bounds.center - objCenter), objCenter - coveredTargets[i].bounds.center);
+            var diff = 100 * (coveredTargets[i].bounds.center - objCenter);
+            Ray ray = new Ray(objCenter + diff , objCenter - coveredTargets[i].bounds.center);
             RaycastHit hit;
             if (objCenter == coveredTargets[i].bounds.center)
             {
                 distance = Vector3.Distance(Vector3.zero, coveredTargets[i].bounds.size) / 2;
             }
             else
-            if (coveredTargets[i].Raycast(ray, out hit, 2000.0f))
+            if (coveredTargets[i].Raycast(ray, out hit, diff.magnitude * 2))
             {
                 distance = Vector3.Distance(hit.point, objCenter);
             }
@@ -816,11 +819,6 @@ public class DroneCasting : MonoBehaviour
         while (i < coveredTargets.Length)
         {
             float ScaleCoefficient = 0.18f / longestDis;
-            //if (coveredTargets[i].name == "MainSphere" || coveredTargets[i].tag == "NoCopy" || coveredTargets[i].tag == "Floor")
-            //{
-            //    i++;
-            //    continue;
-            //}
             bool exist = false;
             var dis = coveredTargets[i].transform.position - center;
             Vector3 pos = SpherePos + realdis[i] * ScaleCoefficient;
@@ -997,6 +995,7 @@ public class DroneCasting : MonoBehaviour
             print("Now STEP = " + NowSTEP.ToString());
         }
     }
+
     private void SetFrontDown()
     {
         CamFrontProjXZ = Cam.transform.forward;
@@ -1006,24 +1005,27 @@ public class DroneCasting : MonoBehaviour
         CamFrontProjXZ.Normalize();
         CamDownParaY.Normalize();
     }
+    /*
     private int FromStepToLayerMask(STEP step)
     {
+        
         // Bit shift the index of the layer (8) to get a bit mask
         int layerMask = 1 << LayerMask.NameToLayer("NearFieldObjects");
         // This would cast rays only against colliders in layer 8.
         // But instead we want to collide against everything except layer 8. The ~ operator does this, it inverts a bitmask.
         if (step != STEP.Two)
         {
-            layerMask = ~layerMask;
-            layerMask ^= 1 << LayerMask.NameToLayer("UnchangeableObjects");
+            layerMask = ~layerMask; // turn on all layer and turn off NearFieldObjects
+            layerMask ^= 1 << LayerMask.NameToLayer("UnchangeableObjects"); // switch Unchangeable Objects
         }
         if (step == STEP.One)
         {
-            layerMask ^= 1 << LayerMask.NameToLayer("NearFieldObjects");
+            layerMask ^= 1 << LayerMask.NameToLayer("NearFieldObjects"); // switch NearFieldObjects
         }
         return layerMask;
+        
     }
-
+    */
     public GameObject getCastingUtil()
     {
         return CastingUtil;

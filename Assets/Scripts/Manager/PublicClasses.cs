@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
+﻿using UnityEngine;
 
 /**
  * This script is used for storing public classes for other script
@@ -12,7 +9,7 @@ using UnityEngine;
  * LineDrawer will draw the line in the game,call DrawLineInGameView() in each update.
  * </summary>
  */
-public struct Linedrawer
+public class Linedrawer
 {
     private LineRenderer lineRenderer;
     public float lineSize;

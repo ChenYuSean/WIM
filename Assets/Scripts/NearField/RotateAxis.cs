@@ -30,8 +30,8 @@ public class RotateAxis : MonoBehaviour
     private Vector3 projectedPLFL;
     private Vector3 parentEulerAngles;
 
-    public GameObject controllerRight;
-    public GameObject controllerLeft;
+    public GameObject rightController;
+    public GameObject leftController;
 
     public bool touching = false;
     public bool rotating = false;
@@ -74,8 +74,8 @@ public class RotateAxis : MonoBehaviour
         {
             rotating = false;
         }
-        posThisFrameR = controllerRight.transform.position;
-        posThisFrameL = controllerLeft.transform.position;
+        posThisFrameR = rightController.transform.position;
+        posThisFrameL = leftController.transform.position;
         Vector3 dir = new Vector3(0, 0, 0);
         switch (mRotationAxis)
         {

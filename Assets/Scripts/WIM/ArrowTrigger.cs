@@ -73,7 +73,7 @@ public class ArrowTrigger : MonoBehaviour
             wimType = "global";
             return true;
         }
-        if (other.name == "RoiCollider" && other.gameObject.layer == LayerMask.NameToLayer("LocalRoi"))
+        if (other.name == "RoiCollider" && other.gameObject.layer == LayerMask.NameToLayer("Local Roi"))
         {
             wimType = "local";
             return true;

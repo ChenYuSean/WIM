@@ -7,7 +7,6 @@ using HighlightPlus;
 public class Wim : MonoBehaviour
 {
     private GameObject world;
-    private GameObject leftController, rightController;
     private Camera Cam;
 
     private InputManager IM;
@@ -75,11 +74,15 @@ public class Wim : MonoBehaviour
         var tpscript = GetComponentInChildren<Teleportation>();
         tpscript.OnTeleport += WimPosOnTeleport;
         tpscript.WimTeleport += TeleportInWim;
-        if(!(roiSensor is null))
+        if(roiSensor != null)
         {
             roiSensor.OnEnterRoi += EnterRoi;
             roiSensor.OnExitRoi += ExitRoi;
         }
+        if(localWim != null)
+            localWim.SetActive(true);
+        if (globalWim != null)
+            globalWim.SetActive(true);
     }
     private void OnDisable()
     {
@@ -88,6 +91,8 @@ public class Wim : MonoBehaviour
         tpscript.WimTeleport -= TeleportInWim;
         roiSensor.OnEnterRoi -= EnterRoi;
         roiSensor.OnExitRoi -= ExitRoi;
+        localWim.SetActive(false);
+        globalWim.SetActive(false);
     }
     // Belowed functions called on Start
     /// <summary>
@@ -96,8 +101,6 @@ public class Wim : MonoBehaviour
     void InitEnv()
     {
         world = GameObject.Find("World");
-        leftController = GameObject.Find("Controller (left)");
-        rightController = GameObject.Find("Controller (right)");
         userTransform = GameObject.Find("CameraPos"); 
         Cam = userTransform.GetComponent<Camera>();
         globalWimLayer = LayerMask.NameToLayer("Global Wim");
@@ -144,7 +147,7 @@ public class Wim : MonoBehaviour
         // find the local roi 
         // local roi is used for detect whether controller is in local wim or not
         localRoi = localWim.transform.Find("ROI");
-        SetWimObjLayer(localRoi.gameObject,LayerMask.NameToLayer("LocalRoi"));
+        SetWimObjLayer(localRoi.gameObject,LayerMask.NameToLayer("Local Roi"));
         Destroy(localRoi.GetComponent<TriggerSensor>());
         Destroy(localRoi.GetComponent<RoiGrab>());
         var localRoiCollider = localRoi.Find("RoiCollider"); // Active object

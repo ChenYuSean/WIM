@@ -42,21 +42,23 @@ public class Teleportation : MonoBehaviour
         handCollider = rightController.transform.GetComponentInChildren<ArrowTrigger>();
         handCollider.OnEnterWim += EnteringWim;
         handCollider.OnExitWim += LeavingWim;
+        if(tpArc != null)
+            tpArc.Show();
     }
 
     private void OnDisable()
     {
         triggerScript.OnEnterWim -= EnteringWim;
         triggerScript.OnExitWim -= LeavingWim;
+        tpArc.Hide();
+        tpPoint.SetActive(false);
+
     }
-    // Start is called before the first frame update
     void Start()
     {
         InitEnv();
         InitSettings();
     }
-
-    // Update is called once per frame
     void Update()
     {
         Draw();
@@ -72,6 +74,10 @@ public class Teleportation : MonoBehaviour
         triggerScript = rightController.GetComponentInChildren<ArrowTrigger>();
         if (IM == null)
             IM = GameManager.Instance.getInputManager();
+
+        leftController = (leftController == null) ? GameObject.Find("Controller (left)") : leftController;
+        rightController = (rightController == null) ? GameObject.Find("Controller (right)") : rightController;
+        if (GameObject.ReferenceEquals(leftController, rightController)) throw new System.Exception("Controller Assignment Invalid");
     }
 
     private void InitSettings()

@@ -92,6 +92,10 @@ public class UserSelection : MonoBehaviour
         triggerScriptR = rightController.GetComponentInChildren<ArrowTrigger>();
         triggerScriptL.active = true;
         triggerScriptR.active = true;
+
+        leftController = (leftController == null) ? GameObject.Find("Controller (left)") : leftController;
+        rightController = (rightController == null) ? GameObject.Find("Controller (right)") : rightController;
+        if (GameObject.ReferenceEquals(leftController, rightController)) throw new System.Exception("Controller Assignment Invalid");
     }
 
     /// <summary>
