@@ -44,8 +44,8 @@ public class UserSelection : MonoBehaviour
     {
         getRay();
         DrawLine();
-        RayCasting();
-        NearFieldSelection();
+        RaySelection();
+        //NearFieldSelection();
     }
 
     private void OnEnable()
@@ -95,7 +95,7 @@ public class UserSelection : MonoBehaviour
 
         leftController = (leftController == null) ? GameObject.Find("Controller (left)") : leftController;
         rightController = (rightController == null) ? GameObject.Find("Controller (right)") : rightController;
-        if (GameObject.ReferenceEquals(leftController, rightController)) throw new System.Exception("Controller Assignment Invalid");
+        if (GameObject.ReferenceEquals(leftController, rightController)) throw new System.Exception("Same Controller Assigned");
     }
 
     /// <summary>
@@ -140,7 +140,7 @@ public class UserSelection : MonoBehaviour
     /// <summary>
     /// Select the object by ray. The Bubble Mechanism is used.
     /// </summary>
-    private void RayCasting()
+    private void RaySelection()
     { 
         Casting(IM.LeftHand,RayOriginL, RayDirectionL, RayLengthL, leftDraw);
         Casting(IM.RightHand,RayOriginR, RayDirectionR, RayLengthR, rightDraw);

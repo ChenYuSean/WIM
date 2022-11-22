@@ -73,6 +73,8 @@ public class OperationManager : MonoBehaviour
                 wimScript.enabled = false;
                 selectionScript.enabled = false;
                 tpScript.enabled = false;
+                leftRay.DrawLineInGameView(Vector3.zero, Vector3.zero, Color.red);
+                rightRay.DrawLineInGameView(Vector3.zero, Vector3.zero, Color.red);
                 break;
             case Mode.Local:
                 droneScript.enabled = false;

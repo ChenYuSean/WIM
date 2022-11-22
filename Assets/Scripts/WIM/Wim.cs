@@ -91,8 +91,10 @@ public class Wim : MonoBehaviour
         tpscript.WimTeleport -= TeleportInWim;
         roiSensor.OnEnterRoi -= EnterRoi;
         roiSensor.OnExitRoi -= ExitRoi;
-        localWim.SetActive(false);
-        globalWim.SetActive(false);
+        if (localWim != null)
+            localWim.SetActive(false);
+        if (globalWim != null)
+            globalWim.SetActive(false);
     }
     // Belowed functions called on Start
     /// <summary>

@@ -66,6 +66,15 @@ public class ConeCollision : MonoBehaviour
         if (colliders == null) return;
         colliders.Clear();
     }
+    void OnDisable()
+    {
+        if (colliders == null) return;
+        foreach(Collider c in colliders)
+        {
+            SetHighlight(c.gameObject, "Touch", boolHighlight);
+        }
+    }
+
     public Collider[] getScannedColliders(LayerMask layermask)
     {
         List<Collider> FilteredColliders = new List<Collider>();
