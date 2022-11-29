@@ -125,12 +125,12 @@ public class Teleportation : MonoBehaviour
                 OnExitTeleportMode?.Invoke();
             }
 
-            if (IM.RightHand.Touchpad.axis.magnitude != 0 && changeColor == false)
+            if (IM.RightHand.Touchpad.axis.y < 0 && changeColor == false)
             {
                 changeColor = true;
                 triggerScript.GetComponent<Renderer>().material.SetColor("_Color", Color.cyan);
             }
-            else if (IM.RightHand.Touchpad.axis.magnitude == 0 && changeColor == true)
+            else if (!(IM.RightHand.Touchpad.axis.y < 0) && changeColor == true)
             {
                 changeColor = false;
                 triggerScript.GetComponent<Renderer>().material.SetColor("_Color", Color.yellow);
@@ -153,14 +153,14 @@ public class Teleportation : MonoBehaviour
                 triggerScript.GetComponent<Renderer>().material.SetColor("_Color", Color.yellow);
             }
 
-            if (IM.RightHand.Touchpad.axis.magnitude != 0 && draw == false)
+            if (IM.RightHand.Touchpad.axis.y < 0 && draw == false)
             {   // Draw the arc if user touches the touchpad
                 draw = true;
                 tpArc.Show();
                 OnEnterTeleportMode?.Invoke();
             }
             else
-            if (IM.RightHand.Touchpad.axis.magnitude == 0 && draw == true)
+            if (!(IM.RightHand.Touchpad.axis.y < 0) && draw == true)
             {
                 // Clear the arc if user untouch the touchpad
                 draw = false;
@@ -183,6 +183,7 @@ public class Teleportation : MonoBehaviour
     // Since it assign the function to right hand only, doesn't need to check which hand
     private void EnteringWim(GameObject Controller,string Type)
     {
+        //Debug.Log("InWim");
         if (Type == "local")
             inWim = true;
         else
@@ -191,6 +192,7 @@ public class Teleportation : MonoBehaviour
 
     private void LeavingWim(GameObject Controller,string Type)
     {
+        //Debug.Log("outWim");
         if (Type == "local")
             inWim = false;
         else

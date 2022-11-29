@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// NOT IN USED <br />
+/// Selection that can run independently on this script. <br />
+/// DroneCasting.cs has some same functions. Do not run with DroneCasting. <br />
+/// </summary>
 public class UserSelection : MonoBehaviour
 {
     public Camera Cam;
@@ -23,9 +28,9 @@ public class UserSelection : MonoBehaviour
     private Vector3 RayDirectionR;
     private Vector3 RayDirectionL;
     [SerializeField]
-    private float RayLengthR = 15.0f;
+    private float RayLengthR = 100.0f;
     [SerializeField]
-    private float RayLengthL = 15.0f;
+    private float RayLengthL = 100.0f;
     //
     private ArrowTrigger triggerScriptL;
     private ArrowTrigger triggerScriptR;

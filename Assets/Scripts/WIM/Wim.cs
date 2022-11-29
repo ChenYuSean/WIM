@@ -162,7 +162,7 @@ public class Wim : MonoBehaviour
         Destroy(worldRoi.GetComponent<TriggerSensor>());
         Destroy(worldRoi.GetComponent<RoiGrab>());
         // (optional) turn on/off roi renderer (red box frame)
-        worldRoi.GetComponentInChildren<MeshRenderer>().enabled = true;
+        worldRoi.GetComponentInChildren<MeshRenderer>().enabled = false ;
     }
 
     /// <summary>
@@ -180,9 +180,6 @@ public class Wim : MonoBehaviour
         WimTeleportPoint.transform.parent = localWim.transform;
         WimTPDestination = new GameObject("Wim Teleport");
         WimTPDestination.transform.parent = world.transform;
-        //localWimSpaceCenter = new GameObject("Local Wim Space Center");
-        //RoiCenterlize();
-        //globalWimSpaceCenter = new GameObject("Global Wim Space Center");
     }
 
      /// <summary>
@@ -477,61 +474,10 @@ public class Wim : MonoBehaviour
     {
         if (IM.RightHand.Menu.press)
             UpdateDefaultPos();
-        //if (IM.LeftHand.Touchpad.down.press)
-        //    ZoomInGlobal();
     }
 
-
-    /* NOT IN USED
-    /// <summary>
-    /// Let user turn on lock on mode for Roi following user when teleporting. <br/>
-    /// Default is ON.
-    /// </summary>
-    private void ToggleRoiLockOn()
-    {
-        LockOnState = !LockOnState; // can only be toggle by this function
-        RoiLockOn = !RoiLockOn; // can be disable by grabing roi and auto enable when teleporting
-        ProjectManager.Instance.getAudioManager().setAudioClip(ProjectManager.Instance.getAudioClips()[2]);
-        ProjectManager.Instance.getAudioManager().playSound();
-        if(RoiLockOn)
-            roiSensor.gameObject.transform.position = userPosOnWim.transform.position;
-    }
-    */
-
-    /* NOT IN USED
-    private void ZoomInGlobal()
-    {
-        if (globalWim.transform.localScale.magnitude > 0.5)
-            return;
-        List<GameObject> RoiObject = roiSensor.GetDetected();
-        // turn off the object that is not in ROI
-        foreach(var c in globalWimObj)
-        {
-            if (RoiObject.Contains(c.gameObject) || c.name == "RoiCollider")
-                continue;
-            else
-                c.gameObject.SetActive(false);
-        }
-        LockOnState = false;
-        // Magnify the scale to local wim's size
-        // local wim's size would be auto update at UpdateLocalWimSize()
-        roiSensor.transform.parent = null; // unattach the roiSensor for the size to stay same in world space
-        globalWim.transform.localScale = localWim.transform.localScale;
-        roiSensor.transform.parent = globalWim.transform;
-        UpdateUserPosOnWim();
-    }
-    */
     // Public-------------------------------------------------------------------------------
 
-    /* NOT IN USED
-    public void RoiCenterlize()
-    {
-        localWim.transform.parent = null;
-        localWimSpaceCenter.transform.position = localRoi.transform.position;
-        localWim.transform.parent = localWimSpaceCenter.transform;
-        localWimSpaceCenter.transform.position = LocalWimDefaultPos.transform.position;
-    }
-    */
 
     /// <summary>
     /// Update two WIM default position relative to user.

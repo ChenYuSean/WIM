@@ -5,15 +5,15 @@ using UnityEngine.Events;
 using Valve.VR;
 using HighlightPlus;
 
-/**
- * <summary>
- * This script is singleton and only attach to [CameraRig] in Unity.<br/>
- * To active this script, please use the GameManager in Unity and change the mode to Drone.<br/>
- * DroneCasting is the main script controll over bubble mechanism and two step selection.<br/>
- * It gets the current step in GameManager and controll the step flow in Update(),<br/>
- * In default step, bubble mechanism is used, and in two step method, the Drone method is used.<br/>
- * </summary>
- */
+
+/// <summary>
+/// This script is singleton and only attach to [CameraRig] in Unity.<br/>
+/// DroneCasting is the main script controll over bubble mechanism and two step selection.<br/>
+/// It gets the current step in GameManager and controll the step flow in Update(),<br/>
+/// In default step, bubble mechanism is used, and in two step method, the Drone method is used.<br/>
+/// Wim and Teleportation has been switch on and off in this script.
+/// </summary>
+
 public class DroneCasting : MonoBehaviour
 {
 
@@ -23,6 +23,8 @@ public class DroneCasting : MonoBehaviour
     public InputManager IM;
     public GameObject DroneScanner;
     public GameObject CastingUtil;
+    private Wim WIM;
+    private Teleportation tpScript;
 
     public GameObject RightHandArrow;
     public GameObject LeftHandArrow;
@@ -50,9 +52,11 @@ public class DroneCasting : MonoBehaviour
     private GameObject BubbleObjR;
     private GameObject BubbleObjL;
 
-    Linedrawer LineDrawerL;
-    Linedrawer LineDrawerR;
-
+    private Linedrawer LineDrawerL;
+    private Linedrawer LineDrawerR;
+    private bool leftDraw = false;
+    private bool rightDraw = true;
+    private int drawFlag = 1;
 
     private GameObject ReplicaParent;
     private GameObject NearFieldSphere;
@@ -83,22 +87,17 @@ public class DroneCasting : MonoBehaviour
 
     // Record the LocalScale of RotationAxis when the user enter enlarge mode
     private Vector3 oriLocalScale = Vector3.zero;
-    private Vector3 oriPosition = Vector3.zero;
-
-    private Vector3 PosLF;
-    private Quaternion QuaternionLF;
 
     private int DepthResetCounter = 0;
     private int AngleResetCounter = 0;
-
     private void OnEnable()
     {
         if(CastingUtil != null)
             CastingUtil.SetActive(true);
         if(DroneScanner != null)
             DroneScanner.SetActive(true);
+        Subscribe();
     }
-
     private void OnDisable()
     {
         var NOW = GameManager.Instance.GetCurStep();
@@ -110,7 +109,32 @@ public class DroneCasting : MonoBehaviour
         CastingUtil.SetActive(false);
         if(DroneScanner != null)
             DroneScanner.SetActive(false);
+        Unsubscribe();
     }
+
+    private void Subscribe()
+    {
+        ArrowTrigger handCollider;
+        handCollider = rightController.transform.GetComponentInChildren<ArrowTrigger>();
+        handCollider.OnEnterWim += EnteringWim;
+        handCollider.OnExitWim += LeavingWim;
+
+        Teleportation tpScript = GameManager.Instance.getCameraRig().GetComponentInChildren<Teleportation>();
+        tpScript.OnEnterTeleportMode += TpModeEnter;
+        tpScript.OnExitTeleportMode += TpModeExit;
+    }
+    private void Unsubscribe()
+    {
+        // remove listener from broadcast
+        ArrowTrigger handCollider;
+        handCollider = rightController.transform.GetComponentInChildren<ArrowTrigger>();
+        handCollider.OnEnterWim -= EnteringWim;
+        handCollider.OnExitWim -= LeavingWim;
+
+        tpScript.OnEnterTeleportMode -= TpModeEnter;
+        tpScript.OnExitTeleportMode -= TpModeExit;
+    }
+
 
     void Awake()
     {
@@ -130,6 +154,9 @@ public class DroneCasting : MonoBehaviour
         ReplicaParent = GameObject.Find("ReplicaParent");
         if (ReplicaParent is null)
             ReplicaParent = new GameObject("ReplicaParent");
+        // World in Minirature
+        WIM = GetComponent<Wim>();
+        tpScript = GetComponentInChildren<Teleportation>();
         // initalize variable
         ScanningAngle = DefaultAngle;
         ScanningDepth = DefaultDepth;
@@ -142,8 +169,8 @@ public class DroneCasting : MonoBehaviour
             IM = GameManager.Instance.getInputManager();
 
         AxisState = RotationAxis.GetComponent<AxisState>();
-        LineDrawerL = GetComponent<OperationManager>().leftRay;
-        LineDrawerR = GetComponent<OperationManager>().rightRay;
+        LineDrawerL = new Linedrawer();
+        LineDrawerR = new Linedrawer();
         Context = new List<GameObject>();
         ContextInPersonal = new List<GameObject>();
         RotationAxis.SetActive(false);
@@ -152,8 +179,6 @@ public class DroneCasting : MonoBehaviour
         NearFieldSphere.SetActive(false);
         Cone.SetActive(false);
         Drone.SetActive(false);
-        PosLF = Cam.transform.position;
-        QuaternionLF = Cam.transform.rotation;
 
         Cone.GetComponent<ConeScript>().setAngle(ScanningAngle);
     }
@@ -161,10 +186,6 @@ public class DroneCasting : MonoBehaviour
     void Update()
     {
         SetFrontDown();
-
-        PosLF = Cam.transform.position;
-        QuaternionLF = Cam.transform.rotation;
-
         FlowControl();
     }
 
@@ -185,6 +206,8 @@ public class DroneCasting : MonoBehaviour
 
         if (NOWSTEP == STEP.dflt)
         {
+            if (drawFlag < 1) // Can't Draw Ray in other mode (Wim, Teleportation)
+                return;
             int layerMask = LayerMask.GetMask("SelectableBackground");
             RayLengthR = 100.0f;
             RayLengthL = 0.0f;
@@ -204,11 +227,12 @@ public class DroneCasting : MonoBehaviour
                     CompleteSelection();
                 }
                 // default -> Step1
-                if (IM.RightHand.Touchpad.axis.y != 0 || IM.LeftHand.Grip.press)
+                if (IM.RightHand.Touchpad.up.press)
                 {
                     var offset = rhit.collider.bounds.size.y + 1;
                     Vector3 dronePos = RayDestinationR + new Vector3(0, offset, 0);
-                    LeavingStep(STEP.dflt, dronePos);
+                    SetDrone(dronePos, rhit.point);
+                    LeavingStep(STEP.dflt);
                     EnteringStep(STEP.One);
                     return;
                 }
@@ -227,29 +251,30 @@ public class DroneCasting : MonoBehaviour
                     SetHighlight(SelectedObj, "Grab", true);
                     CompleteSelection();
                 }
-                // Place Drone on Background
+                // Place Drone on Background (Unselectable)
                 layerMask = LayerMask.GetMask("Background");
                 if (Physics.Raycast(RayOriginR, RayDirectionR, out rhit, RayLengthR, layerMask))
                 {
-                    if (IM.RightHand.Touchpad.axis.y != 0 || IM.LeftHand.Grip.press)
+                    if (IM.RightHand.Touchpad.up.press)
                     {
                         var offset = rhit.collider.bounds.size.y + 1;
                         RayDestinationR = RayOriginR + RayDirectionR * rhit.distance;
                         Vector3 dronePos = RayDestinationR + new Vector3(0, offset, 0);
-                        LeavingStep(STEP.dflt, dronePos);
+                        SetDrone(dronePos, rhit.point);
+                        LeavingStep(STEP.dflt);
                         EnteringStep(STEP.One);
                         return;
                     }
                 }
             }
             // Draw the ray
-            LineDrawerR.DrawLineInGameView(RayOriginR, RayDestinationR, Color.red);
+            DrawLine();
         }
         else
         if (NOWSTEP == STEP.One)
         {
             //Step One -> Default
-            if (IM.RightHand.Grip.press)
+            if (IM.RightHand.Touchpad.down.press)
             {
                 LeavingStep(STEP.One);
                 EnteringStep(STEP.dflt);
@@ -308,7 +333,7 @@ public class DroneCasting : MonoBehaviour
                 }
             }
             // Draw Ray
-            LineDrawerL.DrawLineInGameView(RayOriginL, RayDestinationL, Color.red);
+            DrawLine();
 
             // Drone
             AdjustScanningArea();
@@ -319,7 +344,7 @@ public class DroneCasting : MonoBehaviour
             Cone.transform.rotation = Drone.transform.rotation;
 
             // STEP1 -> STEP2
-            if (IM.LeftHand.Grip.press)
+            if (IM.RightHand.Touchpad.up.press)
             {
                 LeavingStep(STEP.One);
                 EnteringStep(STEP.Two);
@@ -330,7 +355,7 @@ public class DroneCasting : MonoBehaviour
         if (NOWSTEP == STEP.Two)
         {
             // STEP 2 -> STEP 1
-            if (IM.RightHand.Grip.press)
+            if (IM.RightHand.Touchpad.down.press)
             {
                 LeavingStep(STEP.Two);
                 EnteringStep(STEP.One);
@@ -389,9 +414,8 @@ public class DroneCasting : MonoBehaviour
                     }
                 }
             }
-            LineDrawerR.DrawLineInGameView(RayOriginR, RayDestinationR, Color.red);
 
-             //Left hand Ray
+            //Left hand Ray
             if (Physics.Raycast(RayOriginL, RayDirectionL, out lhit, RayLengthL, layerMask))
             {
                 BubbleDiskL.SetActive(false);
@@ -435,8 +459,8 @@ public class DroneCasting : MonoBehaviour
                     }
                 }
             }
-            LineDrawerL.DrawLineInGameView(RayOriginL, RayDestinationL, Color.red);
-
+            // Draw Ray
+            DrawLine();
             // Enlarge
             if (IM.RightHand.Touchpad.right.press)
             {
@@ -470,10 +494,22 @@ public class DroneCasting : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Detect the invalid step in code. Please fix the code and try it again.");
+            throw new System.Exception("Invalid Step");
         }
     }
     
+    private void SetDrone(Vector3 pos, Vector3 rayHit)
+    {
+        // Set Drone Transform
+        Drone.transform.position = pos;
+        Cone.GetComponent<ConeScript>().setAngle(ScanningAngle);
+        Cone.transform.position = Drone.transform.position;
+        Cone.transform.rotation = Drone.transform.rotation;
+        // Caculate the Scanning Depth
+        float length = Mathf.Abs(pos.y - rayHit.y);
+        ScanningDepth = Mathf.Ceil(length / DeltaDepth) * DeltaDepth;
+
+    }
     /// <summary>
     /// Preprocessing of Enter the Next Step.
     /// </summary>
@@ -483,34 +519,45 @@ public class DroneCasting : MonoBehaviour
         switch(NOW)
         {
             case STEP.dflt:
-                //turn of visibility
+                // Turn off visibility
                 Drone.SetActive(false);
                 Cone.SetActive(false);
                 BubbleDiskL.SetActive(false);
-                LineDrawerL.DrawLineInGameView(Vector3.zero, Vector3.zero, Color.red);
+                // Turn off left ray/ Turn on right ray
+                ToggleDraw(false, false);
+                ToggleDraw(true, true);
+                // Clean Context
                 CleanUpContext();
+                // Turn on Wim and teleport
+                WIM.enabled = true;
+                tpScript.enabled = true;
                 GameManager.Instance.SetCurStep(STEP.dflt);
                 break;
             case STEP.One:
-                LineDrawerR.DrawLineInGameView(Vector3.zero, Vector3.zero, Color.red);
+                // Turn off right ray / Turn on left ray
+                ToggleDraw(false, true);
+                ToggleDraw(true, false);
+                // Turn on visibility
                 Drone.SetActive(true);
                 Cone.SetActive(true);
                 GameManager.Instance.SetCurStep(STEP.One);
                 break;
             case STEP.Two:
-
+                // Turn on visibility 
                 RightHandArrow.SetActive(true);
                 RotationAxis.SetActive(true);
-
+                // Turn on right ray
+                ToggleDraw(true, true);
+                // Set RotationAxis
                 RotationAxis.transform.eulerAngles = Vector3.zero;
                 RotationAxis.transform.position = SpherePos;// Cam.transform.position + down / 5 + front / 2;
                 RotationAxis.transform.localScale = new Vector3(0.4f / 0.18f, 0.4f / 0.18f, 0.4f / 0.18f);
-
+                // reset to default
                 Enlarge = false;
-
+                // play sound
                 AudioSource.clip = FromStep2ToStep1;
                 AudioSource.Play();
-
+                // create replica
                 var droneLayerMask = LayerMask.GetMask("SelectableBackground");
                 CreateReplicas(Drone.transform.position, droneLayerMask);
                 GameManager.Instance.SetCurStep(STEP.Two);
@@ -520,20 +567,16 @@ public class DroneCasting : MonoBehaviour
 
     /// <summary>
     /// Clear up before leaving the current step. <br/>
-    /// Drone Pos is used in leaving Default Step for spawning drone on spot.
     /// </summary>
     /// <param name="NOW"></param>
-    /// <param name="DronePos">Only using in DEFAULT Step</param>
-    private void LeavingStep(STEP NOW, Vector3? DronePos = null)
+    private void LeavingStep(STEP NOW)
     {
         switch (NOW)
         {
             case STEP.dflt:
-                if (DronePos == null) throw new System.Exception("Need Drone Position");
-                Drone.transform.position = (Vector3)DronePos;
-                Cone.GetComponent<ConeScript>().setAngle(ScanningAngle);
-                Cone.transform.position = Drone.transform.position;
-                Cone.transform.rotation = Drone.transform.rotation;
+                // Turn off Wim and teleportation
+                WIM.enabled = false;
+                tpScript.enabled = false;
                 break;
             case STEP.One:
                 NearFieldSphere.SetActive(false);
@@ -544,7 +587,8 @@ public class DroneCasting : MonoBehaviour
                 RotationAxis.SetActive(false);
                 RotationAxis.transform.localScale = oriLocalScale;
                 Enlarge = false;
-                LineDrawerR.DrawLineInGameView(Vector3.zero, Vector3.zero, Color.red);
+                // Turn off right ray
+                ToggleDraw(true, false);
                 break;
         }
     }
@@ -690,7 +734,7 @@ public class DroneCasting : MonoBehaviour
         {
             while (i < coveredTargets.Length)
             {
-                if (Context[j].name == coveredTargets[i].name)
+                if (Context[j].GetInstanceID() == coveredTargets[i].gameObject.GetInstanceID())
                 {
                     break;
                 }
@@ -752,14 +796,14 @@ public class DroneCasting : MonoBehaviour
             // Add New Replicas
             while (j < Context.Count)
             {
-                if (Context[j].name == coveredTargets[i].name)
+                if (Context[j].GetInstanceID() == coveredTargets[i].gameObject.GetInstanceID())
                 {
                     exist = true;
                     ContextInPersonal[j].gameObject.transform.position = pos;
                     ContextInPersonal[j].gameObject.transform.rotation = coveredTargets[i].transform.rotation;
-                    ContextInPersonal[j].gameObject.transform.localScale = coveredTargets[i].transform.localScale * ScaleCoefficient;
+                    //ContextInPersonal[j].gameObject.transform.localScale = coveredTargets[i].transform.localScale * ScaleCoefficient;
                     ContextInPersonal[j].gameObject.transform.parent = RotationAxis.transform;
-                    SetHighlight(Context[j], "Touch", true);
+                    //SetHighlight(Context[j], "Touch", true); // Done in ConeCollision.cs
                     ContextInPersonal[j].gameObject.transform.position = pos;
                     //ContextInPersonal[j].gameObject.AddComponent<ReplicaGrab>();
                     break;
@@ -777,7 +821,7 @@ public class DroneCasting : MonoBehaviour
 
                 Context.Add(coveredTargets[i].gameObject);
                 obj.transform.parent = RotationAxis.transform;
-                SetHighlight(obj, "Touch", true);
+                //SetHighlight(obj, "Touch", true);
                 obj.transform.position = pos;
                 //obj.AddComponent<ReplicaGrab>();
                 ContextInPersonal.Add(obj);
@@ -787,9 +831,7 @@ public class DroneCasting : MonoBehaviour
             j = 0;
         }
 
-        oriLocalScale = RotationAxis.transform.localScale;
-        oriPosition = RotationAxis.transform.position;
-        
+        oriLocalScale = RotationAxis.transform.localScale;      
     }
 
     /// <summary>
@@ -813,7 +855,7 @@ public class DroneCasting : MonoBehaviour
         {
             while (i < coveredTargets.Length)
             {
-                if (Context[j].name == coveredTargets[i].name)
+                if (Context[j].GetInstanceID() == coveredTargets[i].gameObject.GetInstanceID())
                 {
                     break;
                 }
@@ -872,10 +914,10 @@ public class DroneCasting : MonoBehaviour
             bool exist = false;
             var dis = coveredTargets[i].transform.position - center;
             Vector3 pos = SpherePos + realdis[i] * ScaleCoefficient;
-            // Add New Relicas
+            // Add New Replicas
             while (j < Context.Count)
             {
-                if (Context[j].name == coveredTargets[i].name)
+                if (Context[j].GetInstanceID() == coveredTargets[i].gameObject.GetInstanceID())
                 {
                     exist = true;
                     ContextInPersonal[j].gameObject.transform.position = pos;
@@ -896,6 +938,7 @@ public class DroneCasting : MonoBehaviour
                 if (obj.GetComponent<Rigidbody>() != null)
                     Destroy(obj.GetComponent<Rigidbody>());
                 obj.transform.parent = ReplicaParent.transform;
+                SetHighlight(obj, "Touch", false);
 
                 Context.Add(coveredTargets[i].gameObject);
                 ContextInPersonal.Add(obj);
@@ -1032,6 +1075,52 @@ public class DroneCasting : MonoBehaviour
         float trueDis = Vector3.Distance(ori + vecProj, nearstPointOnCollider);
         return trueDis;
     }
+    /// <summary>
+    /// Draw the ray in Scene
+    /// </summary>
+    private void DrawLine()
+    {
+        if (leftDraw)
+        {
+            LineDrawerL.DrawLineInGameView(RayOriginL, RayDestinationL, Color.red);
+        }
+        if (rightDraw)
+        {
+            LineDrawerR.DrawLineInGameView(RayOriginR, RayDestinationR, Color.red);
+        }
+    }
+    /// <summary>
+    /// Turn on or off the line drawer. Also clear the line in scene when turn off.
+    /// </summary>
+    private void ToggleDraw(bool isRight, bool OnOff)
+    {
+        if (isRight)
+        {
+            if (OnOff)
+            {
+                rightDraw = true;
+            }
+            else
+            {
+                rightDraw = false;
+                LineDrawerR.DrawLineInGameView(Vector3.zero, Vector3.zero, Color.red);
+                BubbleDiskR.SetActive(false);
+            }
+        }
+        else
+        {
+            if (OnOff)
+            {
+                leftDraw = true;
+            }
+            else
+            {
+                leftDraw = false;
+                LineDrawerL.DrawLineInGameView(Vector3.zero, Vector3.zero, Color.red);
+                BubbleDiskL.SetActive(false);
+            }
+        }
+    }
 
     private IEnumerator ShowSTEP(float waitTime)
     {
@@ -1053,6 +1142,47 @@ public class DroneCasting : MonoBehaviour
         CamFrontProjXZ.Normalize();
         CamDownParaY.Normalize();
     }
+    // Listener Fuctions
+    void DrawLock(int add)
+    {
+        drawFlag += add;
+        if (drawFlag > 1)
+            drawFlag = 1;
+        if (drawFlag < -1)
+            drawFlag = -1;
+    }
+    private void EnteringWim(GameObject Controller, string Type)
+    {
+        if (GameObject.ReferenceEquals(Controller, rightController))
+        {
+            ToggleDraw(true, false);
+            DrawLock(-1);
+        }
+    }
+
+    private void LeavingWim(GameObject Controller, string Type)
+    {
+        if (GameObject.ReferenceEquals(Controller, rightController))
+        {
+            if (drawFlag == 0)
+                ToggleDraw(true, true);
+            DrawLock(1);
+
+        }
+    }
+    private void TpModeEnter()
+    {
+        ToggleDraw(true, false);
+        DrawLock(-1);
+    }
+
+    private void TpModeExit()
+    {
+        if (drawFlag == 0)
+            ToggleDraw(true, true);
+        DrawLock(1);
+    }
+    // public functions
     public GameObject getCastingUtil()
     {
         return CastingUtil;

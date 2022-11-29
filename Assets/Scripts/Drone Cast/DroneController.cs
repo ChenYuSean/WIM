@@ -6,21 +6,20 @@ using Valve.VR;
 using HighlightPlus;
 
 
-/**
- * <summary>
- * DroneController is the script for controlling the drone.<br/>
- * This script controls the drone movement. It doesn't affect on selection or scanning area. For selection part,
- * see the script <seealso cref="DroneCasting"/> in "[CameraRig]" for more details.
- * This script is only attaches to the object "Drone" in Unity.<br/>
- * <br/>
- * Controlling has two part, Homer Control and Cursor Control.<br/>
- * In Homer Control, user need to hold trigger to move. Homer Control move drone like an object in hand, but scale up with the distance 
- * ratio of Drone to user/Controller to user. <br/>
- * In Cursor control, user move drone with the touchpad. By touching touchpad, drone will move foward,backward,left and right in its current facing direction.<br/>
- * Rotation of drone is always update with the controller's rotation.
- * </summary>
- * 
- */
+
+/// <summary>
+/// DroneController is the script for controlling the drone.<br/>
+/// This script controls the drone movement. It doesn't affect on selection or scanning area. For selection part,
+/// see the script <seealso cref="DroneCasting"/> in "[CameraRig]" for more details.
+/// This script is only attaches to the object "Drone" in Unity.<br/>
+/// <br/>
+/// Controlling has two part, Homer Control and Cursor Control.<br/>
+/// In Homer Control, user need to hold trigger to move. Homer Control move drone like an object in hand, but scale up with the distance 
+/// ratio of Drone to user/Controller to user. <br/>
+/// In Cursor control, user move drone with the touchpad. By touching touchpad, drone will move foward,backward,left and right in its current facing direction.<br/>
+/// Rotation of drone is always update with the controller's rotation. <br/>
+/// Note: Cursor Control has been removed
+/// </summary>
 public class DroneController : MonoBehaviour
 {
 
@@ -59,7 +58,7 @@ public class DroneController : MonoBehaviour
         else
         {
             firstTrigger = false;
-            HorizontalMovement();
+            //HorizontalMovement();
         }
     }
 

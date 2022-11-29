@@ -6,7 +6,8 @@ public class ArrowTrigger : MonoBehaviour
 {
     GameObject hit;
     Vector3 point;
-    public bool active = false;
+    [Tooltip("Turn On/Off the trigger")]
+    public bool active = true;
     public delegate void WimDetect(GameObject Controller, string Type);
     public WimDetect OnEnterWim;
     public WimDetect OnExitWim;

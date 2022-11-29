@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
+/// NOT IN USED <br />
 /// Operation Manager is singleton attach to CameraRig. <br\>
 /// Managing the mode between WIM and Two Step Selection. <br\>
 /// Also keep the shared variable between script;
