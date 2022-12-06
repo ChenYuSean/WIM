@@ -63,7 +63,7 @@ public class Wim : MonoBehaviour
     void Update()
     {
         TrackingRoiPos();
-        AutoUpdateDefaultPos();
+        //AutoUpdateDefaultPos();
         UpdateLocalWimSize();
         UpdateWimPos();
         UpdateWorldRoi();
@@ -85,6 +85,10 @@ public class Wim : MonoBehaviour
             localWim.SetActive(true);
         if (globalWim != null)
             globalWim.SetActive(true);
+        if (GlobalWimDefaultPos.gameObject != null)
+            GlobalWimDefaultPos.gameObject.SetActive(true);
+        if (LocalWimDefaultPos.gameObject != null)
+            LocalWimDefaultPos.gameObject.SetActive(true);
     }
     private void OnDisable()
     {
@@ -97,6 +101,10 @@ public class Wim : MonoBehaviour
             localWim.SetActive(false);
         if (globalWim != null)
             globalWim.SetActive(false);
+        if (GlobalWimDefaultPos.gameObject != null)
+            GlobalWimDefaultPos.gameObject.SetActive(false);
+        if (LocalWimDefaultPos.gameObject != null)
+            LocalWimDefaultPos.gameObject.SetActive(false);
     }
     // Belowed functions called on Start
     /// <summary>
@@ -158,7 +166,7 @@ public class Wim : MonoBehaviour
         localRoiCollider.GetComponent<BoxCollider>().enabled = true; // turn on collider 
         localRoiCollider.GetComponent<MeshRenderer>().enabled = false; // turn off renderer
         var scale = localRoiCollider.transform.localScale;
-        localRoiCollider.transform.localScale = new Vector3(scale.x * 1.5f,scale.y,scale.z * 1.5f);
+        localRoiCollider.transform.localScale = new Vector3(scale.x * 2.0f,scale.y * 1.5f,scale.z * 2.0f);
         // destroy component on World Roi
         Destroy(worldRoi.GetComponent<TriggerSensor>());
         Destroy(worldRoi.GetComponent<RoiGrab>());
@@ -441,9 +449,10 @@ public class Wim : MonoBehaviour
     {
         // local
         localWim.transform.position = LocalWimDefaultPos.position + (localWim.transform.position - trackingRoiinLocal.transform.position);
-        //localWimSpaceCenter.transform.position = LocalWimDefaultPos.position;
+        localWim.transform.rotation = LocalWimDefaultPos.rotation;
         // global
         globalWim.transform.position = GlobalWimDefaultPos.position;
+        globalWim.transform.rotation = GlobalWimDefaultPos.rotation;
     }
 
     private void UpdateWorldRoi()
@@ -558,7 +567,7 @@ public class Wim : MonoBehaviour
     /// </summary>
     private void WimPosOnTeleport()
     {
-        UpdateDefaultPos();
+        // UpdateDefaultPos();
         // RoiLockOn would be turn off by grabing ROI in global wim
         // Turn back to the original state before grabing
         RoiLockOn = LockOnState; 
