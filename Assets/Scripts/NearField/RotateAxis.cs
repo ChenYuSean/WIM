@@ -28,7 +28,6 @@ public class RotateAxis : MonoBehaviour
     private Vector3 posLastFrameL;
     private Vector3 projectedPTFL;
     private Vector3 projectedPLFL;
-    private Vector3 parentEulerAngles;
 
     public GameObject rightController;
     public GameObject leftController;
@@ -42,7 +41,6 @@ public class RotateAxis : MonoBehaviour
     void Start()
     {
         mParent = transform.parent.gameObject;
-        parentEulerAngles = mParent.transform.eulerAngles;
         m_controllerPress = SteamVR_Input.GetAction<SteamVR_Action_Boolean>("PressTrigger");
         m_Pose = SteamVR_Input.GetAction<SteamVR_Action_Pose>("Pose");
         state = transform.parent.GetComponent<AxisState>();
@@ -76,7 +74,7 @@ public class RotateAxis : MonoBehaviour
         }
         posThisFrameR = rightController.transform.position;
         posThisFrameL = leftController.transform.position;
-        Vector3 dir = new Vector3(0, 0, 0);
+        Vector3 dir = Vector3.zero;
         switch (mRotationAxis)
         {
             case ra.X_axis:
@@ -90,17 +88,18 @@ public class RotateAxis : MonoBehaviour
                 break;
         }
         // Project this two vectors onto the plane whose normal vector is dir.
-        projectedPTFR = posThisFrameR - dir * Vector3.Dot(posThisFrameR, dir);
-        projectedPLFR = posLastFrameR - dir * Vector3.Dot(posLastFrameR, dir);
-        projectedPTFL = posThisFrameL - dir * Vector3.Dot(posThisFrameL, dir);
-        projectedPLFL = posLastFrameL - dir * Vector3.Dot(posLastFrameL, dir);
+        projectedPTFR = Vector3.ProjectOnPlane(posThisFrameR, dir);
+        projectedPLFR = Vector3.ProjectOnPlane(posLastFrameR, dir);  
+        projectedPTFL = Vector3.ProjectOnPlane(posThisFrameL, dir);  
+        projectedPLFL = Vector3.ProjectOnPlane(posLastFrameL, dir);
+        var mp = Vector3.ProjectOnPlane(mParent.transform.position, dir);
         if (state.rotating && rotating)
         {
             Vector3 dif = whichhand? projectedPTFR - projectedPLFR : projectedPTFL - projectedPLFL;
-            Vector3 centerToController = whichhand? projectedPLFR - mParent.transform.position : projectedPLFL - mParent.transform.position;
+            Vector3 centerToController = whichhand? projectedPLFR - mp : projectedPLFL - mp;
             int s = Vector3.Dot(Vector3.Cross(dif, centerToController), dir) < 0 ? 1 : -1;
-            float difAngle = whichhand? Vector3.Angle(projectedPTFR - mParent.transform.position, projectedPLFR - mParent.transform.position) : Vector3.Angle(projectedPTFL - mParent.transform.position, projectedPLFL - mParent.transform.position);
-            mParent.transform.RotateAround(mParent.transform.position, dir, 3.3f * s * difAngle);
+            float difAngle = whichhand? Vector3.Angle(projectedPTFR - mp, projectedPLFR - mp) : Vector3.Angle(projectedPTFL - mp, projectedPLFL - mp);
+            mParent.transform.RotateAround(mParent.transform.position, dir, 50 * s * difAngle * Time.deltaTime);
         }
     }
 }

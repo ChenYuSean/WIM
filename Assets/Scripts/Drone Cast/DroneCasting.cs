@@ -100,16 +100,17 @@ public class DroneCasting : MonoBehaviour
     }
     private void OnDisable()
     {
+        CastingUtil.SetActive(false);
+        if(DroneScanner != null)
+            DroneScanner.SetActive(false);
+        Unsubscribe();
+
         var NOW = GameManager.Instance.GetCurStep();
         if (NOW != STEP.dflt)
         {
             LeavingStep(NOW);
             EnteringStep(STEP.dflt);
         }
-        CastingUtil.SetActive(false);
-        if(DroneScanner != null)
-            DroneScanner.SetActive(false);
-        Unsubscribe();
     }
 
     private void Subscribe()
@@ -179,6 +180,7 @@ public class DroneCasting : MonoBehaviour
         NearFieldSphere.SetActive(false);
         Cone.SetActive(false);
         Drone.SetActive(false);
+        BubbleDiskL.SetActive(false);
 
         Cone.GetComponent<ConeScript>().setAngle(ScanningAngle);
     }

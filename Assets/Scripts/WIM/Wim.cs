@@ -15,7 +15,7 @@ public class Wim : MonoBehaviour
     private List<GameObject> worldObjectBuffer;
     [SerializeField]
     private Vector3 wimSize = new Vector3(0.005f, 0.005f, 0.005f);
-    private GameObject globalWim, localWim, userTransform;
+    private GameObject globalWim, localWim;
     [SerializeField]
     private Transform GlobalWimDefaultPos;
     [SerializeField]
@@ -26,14 +26,16 @@ public class Wim : MonoBehaviour
 
     private int currentBufferIndex = 0;
     private TriggerSensor roiSensor;
+    // Dummy Object for tracking position
     private GameObject trackingRoiinLocal;
     private GameObject trackingRoiinGlobal;
+    // Teleport in Wim
     private GameObject WimTeleportPoint;
     private GameObject WimTPDestination;
-    //private GameObject localWimSpaceCenter;
-    //private GameObject globalWimSpaceCenter;
-    private GameObject userPosOnWim;
-    private GameObject userPosOnLocalWim;
+    // Avatar
+    private GameObject GlobalAvatar;
+    private GameObject LocalAvatar;
+
     private Transform localRoi;
 
     private Transform globalWimBoundary;
@@ -65,7 +67,7 @@ public class Wim : MonoBehaviour
         UpdateLocalWimSize();
         UpdateWimPos();
         UpdateWorldRoi();
-        UpdateUserPosOnWim();
+        UpdateAvatar();
         InputHandler();
     }
 
@@ -103,8 +105,7 @@ public class Wim : MonoBehaviour
     void InitEnv()
     {
         world = GameObject.Find("World");
-        userTransform = GameObject.Find("CameraPos"); 
-        Cam = userTransform.GetComponent<Camera>();
+        Cam = GameObject.Find("CameraPos").GetComponent<Camera>();
         globalWimLayer = LayerMask.NameToLayer("Global Wim");
         localWimLayer = LayerMask.NameToLayer("Local Wim");
         worldCenter = world.transform.Find("WimBoundary").GetComponent<BoxCollider>().bounds.center;
@@ -188,26 +189,26 @@ public class Wim : MonoBehaviour
     private void InitUserTracking()
     {
         // global
-        userPosOnWim = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        userPosOnWim.name = "User Position";
-        var rend = userPosOnWim.GetComponent<Renderer>();
+        GlobalAvatar = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        GlobalAvatar.name = "User Position";
+        var rend = GlobalAvatar.GetComponent<Renderer>();
         rend.material.color = Color.red;
-        userPosOnWim.transform.localScale = wimSize * 5;
-        userPosOnWim.transform.parent = globalWim.transform;
-        userPosOnWim.AddComponent<ObjectParentChildInfo>();
-        SetWimObjLayer(userPosOnWim, globalWimLayer);
+        GlobalAvatar.transform.localScale = wimSize * 5;
+        GlobalAvatar.transform.parent = globalWim.transform;
+        GlobalAvatar.AddComponent<ObjectParentChildInfo>();
+        SetWimObjLayer(GlobalAvatar, globalWimLayer);
         // local
-        userPosOnLocalWim = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        userPosOnLocalWim.name = "User Position";
-        rend = userPosOnLocalWim.GetComponent<Renderer>();
+        LocalAvatar = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        LocalAvatar.name = "User Position";
+        rend = LocalAvatar.GetComponent<Renderer>();
         rend.material.color = Color.red;
-        userPosOnLocalWim.transform.localScale = localWim.transform.localScale * 2;
-        userPosOnLocalWim.transform.parent = localWim.transform;    
-        userPosOnLocalWim.AddComponent<ObjectParentChildInfo>();
-        SetWimObjLayer(userPosOnLocalWim, localWimLayer);
+        LocalAvatar.transform.localScale = localWim.transform.localScale * 2;
+        LocalAvatar.transform.parent = localWim.transform;    
+        LocalAvatar.AddComponent<ObjectParentChildInfo>();
+        SetWimObjLayer(LocalAvatar, localWimLayer);
 
-        userPosOnWim.GetComponent<ObjectParentChildInfo>().child = userPosOnLocalWim;
-        userPosOnLocalWim.GetComponent<ObjectParentChildInfo>().parent = userPosOnWim;
+        GlobalAvatar.GetComponent<ObjectParentChildInfo>().child = LocalAvatar;
+        LocalAvatar.GetComponent<ObjectParentChildInfo>().parent = GlobalAvatar;
     }
 
 
@@ -452,12 +453,12 @@ public class Wim : MonoBehaviour
         worldRoi.transform.position = worldCenter + dis;
     }
 
-    private void UpdateUserPosOnWim()
+    private void UpdateAvatar()
     {
         var dis = transform.position - worldCenter;
         dis *= wimSize.x;
-        userPosOnWim.transform.position = globalWimBoundary.position + dis;
-        userPosOnLocalWim.transform.localPosition = userPosOnWim.transform.localPosition;
+        GlobalAvatar.transform.position = globalWimBoundary.position + dis;
+        LocalAvatar.transform.localPosition = GlobalAvatar.transform.localPosition;
     }
 
     private void AutoUpdateDefaultPos()
@@ -498,7 +499,7 @@ public class Wim : MonoBehaviour
     /// </summary>
     private void EnterRoi(Collider other)
     {
-        if (GameObject.ReferenceEquals(other.gameObject, userPosOnWim))
+        if (GameObject.ReferenceEquals(other.gameObject, GlobalAvatar))
         {
             isUserInROI = true;
         }
@@ -523,9 +524,9 @@ public class Wim : MonoBehaviour
     private void ExitRoi(Collider other)
     {
         // Roi follows the the user if RoiLockOn is ON
-        if (RoiLockOn && GameObject.ReferenceEquals(other.gameObject, userPosOnWim))
-            roiSensor.gameObject.transform.position = userPosOnWim.transform.position;
-        else if (GameObject.ReferenceEquals(other.gameObject, userPosOnWim))
+        if (RoiLockOn && GameObject.ReferenceEquals(other.gameObject, GlobalAvatar))
+            roiSensor.gameObject.transform.position = GlobalAvatar.transform.position;
+        else if (GameObject.ReferenceEquals(other.gameObject, GlobalAvatar))
             isUserInROI = false;
 
         ObjectParentChildInfo o = other.GetComponent<ObjectParentChildInfo>();
@@ -547,9 +548,9 @@ public class Wim : MonoBehaviour
     /// </summary>
     private void TeleportInWim(Vector3 destination)
     {
-        WimTeleportPoint.transform.position = destination;
-        WimTPDestination.transform.localPosition = WimTeleportPoint.transform.localPosition;
-        transform.position = WimTPDestination.transform.position;
+        WimTeleportPoint.transform.position = destination; // position on Wim
+        WimTPDestination.transform.localPosition = WimTeleportPoint.transform.localPosition; // transfer to WorldSpace
+        transform.position = WimTPDestination.transform.position; // teleport
     }
 
     /// <summary>
@@ -562,6 +563,6 @@ public class Wim : MonoBehaviour
         // Turn back to the original state before grabing
         RoiLockOn = LockOnState; 
         if (RoiLockOn && !isUserInROI)
-            roiSensor.gameObject.transform.position = userPosOnWim.transform.position;
+            roiSensor.gameObject.transform.position = GlobalAvatar.transform.position;
     }
 }
