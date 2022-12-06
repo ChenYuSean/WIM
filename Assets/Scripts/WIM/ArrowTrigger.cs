@@ -69,12 +69,14 @@ public class ArrowTrigger : MonoBehaviour
 
     private bool WimCheck(Collider other)
     {
-        if (other.name == "WimBoundary" && other.gameObject.layer == LayerMask.NameToLayer("Global Wim"))
+        //if (other.name == "WimBoundary" && other.gameObject.layer == LayerMask.NameToLayer("Global Wim"))
+        if(other.name == "GlobalDefaultPos")
         {
             wimType = "global";
             return true;
         }
-        if (other.name == "RoiCollider" && other.gameObject.layer == LayerMask.NameToLayer("Local Roi"))
+        //if (other.name == "RoiCollider" && other.gameObject.layer == LayerMask.NameToLayer("Local Roi"))
+        if(other.name == "LocalDefaultPos")
         {
             wimType = "local";
             return true;

@@ -33,6 +33,7 @@ public class Wim : MonoBehaviour
     private GameObject WimTeleportPoint;
     private GameObject WimTPDestination;
     // Avatar
+    private GameObject WorldAvatar;
     private GameObject GlobalAvatar;
     private GameObject LocalAvatar;
 
@@ -55,15 +56,14 @@ public class Wim : MonoBehaviour
         CreateWim();
         BindingWim();
         InitDummyTracking();
-        InitUserTracking();
         HideLocalWim();
-        StartCoroutine(PosCalibrate());
+        StartCoroutine(PosCalibrate(5.0f));
     }
 
     void Update()
     {
         TrackingRoiPos();
-        //AutoUpdateDefaultPos();
+        AutoUpdateDefaultPos();
         UpdateLocalWimSize();
         UpdateWimPos();
         UpdateWorldRoi();
@@ -118,6 +118,7 @@ public class Wim : MonoBehaviour
         localWimLayer = LayerMask.NameToLayer("Local Wim");
         worldCenter = world.transform.Find("WimBoundary").GetComponent<BoxCollider>().bounds.center;
         worldRoi = world.transform.Find("ROI").gameObject;
+        WorldAvatar = world.transform.Find("Avatar").gameObject;
         IM = GameManager.Instance.getInputManager();
     }
 
@@ -147,6 +148,10 @@ public class Wim : MonoBehaviour
         globalWimBoundary.GetComponent<BoxCollider>().enabled = true;
         roiBoundary = roiSensor.transform.Find("RoiCollider");
         globalWimObj = globalWim.GetComponentsInChildren<Collider>();
+        // Find Avatar
+        GlobalAvatar = globalWim.transform.Find("Avatar").gameObject;
+        GlobalAvatar.SetActive(true);
+        GlobalAvatar.transform.localScale = new Vector3(10.0f, 10.0f, 10.0f);
 
         // create local wim
         localWim = Instantiate(world);
@@ -167,6 +172,11 @@ public class Wim : MonoBehaviour
         localRoiCollider.GetComponent<MeshRenderer>().enabled = false; // turn off renderer
         var scale = localRoiCollider.transform.localScale;
         localRoiCollider.transform.localScale = new Vector3(scale.x * 2.0f,scale.y * 1.5f,scale.z * 2.0f);
+        // Find Avatar
+        LocalAvatar = localWim.transform.Find("Avatar").gameObject;
+        LocalAvatar.SetActive(true);
+        LocalAvatar.transform.localScale = new Vector3(2.5f, 2.5f, 2.5f);
+
         // destroy component on World Roi
         Destroy(worldRoi.GetComponent<TriggerSensor>());
         Destroy(worldRoi.GetComponent<RoiGrab>());
@@ -190,35 +200,6 @@ public class Wim : MonoBehaviour
         WimTPDestination = new GameObject("Wim Teleport");
         WimTPDestination.transform.parent = world.transform;
     }
-
-     /// <summary>
-     /// Create a red ball indicate the user on Wim
-     /// </summary>
-    private void InitUserTracking()
-    {
-        // global
-        GlobalAvatar = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        GlobalAvatar.name = "User Position";
-        var rend = GlobalAvatar.GetComponent<Renderer>();
-        rend.material.color = Color.red;
-        GlobalAvatar.transform.localScale = wimSize * 5;
-        GlobalAvatar.transform.parent = globalWim.transform;
-        GlobalAvatar.AddComponent<ObjectParentChildInfo>();
-        SetWimObjLayer(GlobalAvatar, globalWimLayer);
-        // local
-        LocalAvatar = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        LocalAvatar.name = "User Position";
-        rend = LocalAvatar.GetComponent<Renderer>();
-        rend.material.color = Color.red;
-        LocalAvatar.transform.localScale = localWim.transform.localScale * 2;
-        LocalAvatar.transform.parent = localWim.transform;    
-        LocalAvatar.AddComponent<ObjectParentChildInfo>();
-        SetWimObjLayer(LocalAvatar, localWimLayer);
-
-        GlobalAvatar.GetComponent<ObjectParentChildInfo>().child = LocalAvatar;
-        LocalAvatar.GetComponent<ObjectParentChildInfo>().parent = GlobalAvatar;
-    }
-
 
     /// <summary>
     /// Set the layer to the object and its child recursively.
@@ -382,9 +363,9 @@ public class Wim : MonoBehaviour
     /// <summary>
     /// Correct the position in the startup, Camera will correct after one second.
     /// </summary> 
-    private IEnumerator PosCalibrate()
+    private IEnumerator PosCalibrate(float time)
     {
-        yield return new WaitForSeconds(1.0f);
+        yield return new WaitForSeconds(time);
         UpdateDefaultPos();
     }
 
@@ -394,9 +375,6 @@ public class Wim : MonoBehaviour
     {
         if (trackingRoiinLocal != null)
         {
-            /* old method
-            trackingRoiLocalPosition.transform.localPosition = roiSensor.transform.localPosition;
-            */
 
             // Caculate the center of the object in the ROI
             // using center as localRoi position could prevent unnecessary movement 
@@ -464,16 +442,16 @@ public class Wim : MonoBehaviour
 
     private void UpdateAvatar()
     {
-        var dis = transform.position - worldCenter;
-        dis *= wimSize.x;
-        GlobalAvatar.transform.position = globalWimBoundary.position + dis;
-        LocalAvatar.transform.localPosition = GlobalAvatar.transform.localPosition;
+        WorldAvatar.transform.position = transform.position;
+        GlobalAvatar.transform.localPosition = WorldAvatar.transform.localPosition;
+        LocalAvatar.transform.localPosition = WorldAvatar.transform.localPosition;
     }
 
     private void AutoUpdateDefaultPos()
     {
+        var DefaultWimPos = transform.Find("WimPos");
         // fix the default pos if it's too far away from camera
-        if((Cam.transform.position - GlobalWimDefaultPos.parent.position).magnitude > 0.33f)
+        if ((Cam.transform.position - DefaultWimPos.position).magnitude > 0.5f)
         {
             UpdateDefaultPos();
         }
@@ -490,14 +468,16 @@ public class Wim : MonoBehaviour
 
 
     /// <summary>
-    /// Update two WIM default position relative to user.
+    /// Place WimPos in front of Camera
     /// </summary>
     public void UpdateDefaultPos()
     {
-        var DefaultWimPos = GlobalWimDefaultPos.parent;
+        var DefaultWimPos = transform.Find("WimPos");
         Vector3 projection = Vector3.ProjectOnPlane(Cam.transform.forward, Vector3.up).normalized;
         DefaultWimPos.rotation = Quaternion.LookRotation(projection, Vector3.up);
         DefaultWimPos.position = Cam.transform.position + projection * 0.0f + Vector3.down * 0.01f;
+        LocalWimDefaultPos.rotation = Quaternion.identity;
+        GlobalWimDefaultPos.rotation = Quaternion.identity;
     }
 
     // Listener
