@@ -52,6 +52,7 @@ public class Teleportation : MonoBehaviour
         triggerScript.OnExitWim -= LeavingWim;
         tpArc.Hide();
         tpPoint.SetActive(false);
+        tpPoint.transform.position = user.transform.position;
 
     }
     void Start()
@@ -170,7 +171,7 @@ public class Teleportation : MonoBehaviour
             }
 
             // Teleport Action(Touchpad press)
-            if (IM.RightHand.Touchpad.key.press && isAbleTP)
+            if (IM.RightHand.Touchpad.down.press && isAbleTP)
             {
                 user.transform.position = tpPoint.transform.position;
                 OnTeleport?.Invoke();
