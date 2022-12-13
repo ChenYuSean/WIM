@@ -23,9 +23,9 @@ public class AxisState : MonoBehaviour
     public RotateAxis x, y, z;
     private void Start()
     {
-        x = GameObject.Find("XAxis").GetComponent<RotateAxis>();
-        y = GameObject.Find("YAxis").GetComponent<RotateAxis>();
-        z = GameObject.Find("ZAxis").GetComponent<RotateAxis>();
+        //x = GameObject.Find("XAxis").GetComponent<RotateAxis>();
+        //y = GameObject.Find("YAxis").GetComponent<RotateAxis>();
+        //z = GameObject.Find("ZAxis").GetComponent<RotateAxis>();
     }
     private void Update()
     {
